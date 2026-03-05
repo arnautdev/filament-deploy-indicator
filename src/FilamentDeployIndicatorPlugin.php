@@ -1,20 +1,25 @@
 <?php
 
-namespace VendorName\Skeleton;
+namespace Arnautdev\FilamentDeployIndicator;
 
 use Filament\Contracts\Plugin;
 use Filament\Panel;
+use Filament\View\PanelsRenderHook;
+use Illuminate\Support\Facades\View;
 
-class SkeletonPlugin implements Plugin
+class FilamentDeployIndicatorPlugin implements Plugin
 {
     public function getId(): string
     {
-        return 'skeleton';
+        return 'filament-deploy-indicator';
     }
 
     public function register(Panel $panel): void
     {
-        //
+        $panel->renderHook(
+            config('filament-deploy-indicator.position', PanelsRenderHook::GLOBAL_SEARCH_BEFORE),
+            fn (): string => View::make('filament-deploy-indicator::indicator')->render(),
+        );
     }
 
     public function boot(Panel $panel): void
