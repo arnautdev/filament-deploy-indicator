@@ -1,62 +1,82 @@
-# Show application ENV and latest deployment info inside your Filament admin.
+# Filament Deploy Indicator
+
+Show the current application environment (ENV) and optional latest deployment info in your Filament topbar.
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/arnautdev/filament-deploy-indicator.svg?style=flat-square)](https://packagist.org/packages/arnautdev/filament-deploy-indicator)
 [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/arnautdev/filament-deploy-indicator/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/arnautdev/filament-deploy-indicator/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/arnautdev/filament-deploy-indicator/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/arnautdev/filament-deploy-indicator/actions?query=workflow%3A"Fix+PHP+code+styling"+branch%3Amain)
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/arnautdev/filament-deploy-indicator/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/arnautdev/filament-deploy-indicator/actions?query=workflow%3A%22Fix+PHP+code+styling%22+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/arnautdev/filament-deploy-indicator.svg?style=flat-square)](https://packagist.org/packages/arnautdev/filament-deploy-indicator)
 
+## Features
 
+- Shows current `APP_ENV` (mapped to a short label like `PROD`, `STAGE`, `LOCAL`) in the Filament topbar.
+- Optional small hint next to the label: commit hash or deploy time.
+- Reads deployment metadata from a JSON file (default: `storage/app/private/deploy-info.json`).
+- Can auto-generate the JSON when missing (using `git`), if enabled.
 
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
+## Requirements
+
+- PHP ^8.2
+- Filament ^4.0 or ^5.0
 
 ## Installation
 
-You can install the package via composer:
+Install the package via Composer:
 
 ```bash
 composer require arnautdev/filament-deploy-indicator
 ```
 
-> [!IMPORTANT]
-> If you have not set up a custom theme and are using Filament Panels follow the instructions in the [Filament Docs](https://filamentphp.com/docs/4.x/styling/overview#creating-a-custom-theme) first.
+## Register the plugin
+Add the plugin to your panel:
 
-After setting up a custom theme add the plugin's views to your theme css file or your app's css file if using the standalone packages.
+```php
+use Arnautdev\FilamentDeployIndicator\FilamentDeployIndicatorPlugin;
 
-```css
-@source '../../../../vendor/arnautdev/filament-deploy-indicator/resources/**/*.blade.php';
+public function panel(Panel $panel): Panel
+{
+    return $panel
+        ->plugins([
+            FilamentDeployIndicatorPlugin::make(),
+        ]);
+}
 ```
 
-You can publish and run the migrations with:
+## Configuration
+Publish the config file:
 
-```bash
-php artisan vendor:publish --tag="filament-deploy-indicator-migrations"
-php artisan migrate
-```
-
-You can publish the config file with:
-
-```bash
+```php
 php artisan vendor:publish --tag="filament-deploy-indicator-config"
 ```
+Config file: config/filament-deploy-indicator.php
 
-Optionally, you can publish the views using
+## Main options
+| Option                       | Description                            |
+| ---------------------------- | -------------------------------------- |
+| `position`                   | Filament render hook position          |
+| `cache_ttl`                  | Cache time in seconds                  |
+| `file_path`                  | Path to deployment JSON                |
+| `auto_generate_when_missing` | Generate JSON using git if missing     |
+| `write_path`                 | Where generated JSON should be written |
+| `git_root`                   | Root of the git repository             |
+| `env_map`                    | Mapping of env → label + color         |
+| `topbar.show`                | `null`, `commit`, or `deployed_at`     |
 
-```bash
-php artisan vendor:publish --tag="filament-deploy-indicator-views"
+## Deployment JSON format
+The plugin reads a JSON file like:
+```json
+{
+  "environment": "local",
+  "deployed_at": "2026-03-04 16:30:00",
+  "commit": "33de817",
+  "branch": "feature/deploy-indicator",
+  "author": "You",
+  "commit_message": "Local test"
+}
 ```
-
-This is the contents of the published config file:
-
-```php
-return [
-];
+Default location:
 ```
-
-## Usage
-
-```php
-$filamentDeployIndicator = new Arnautdev\FilamentDeployIndicator();
-echo $filamentDeployIndicator->echoPhrase('Hello, Arnautdev!');
+storage/app/private/deploy-info.json
 ```
 
 ## Testing
