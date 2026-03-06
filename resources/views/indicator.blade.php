@@ -36,7 +36,7 @@
                 :color="$color"
                 icon="heroicon-m-server-stack"
                 :tooltip="__('filament-deploy-indicator::deploy-indicator.click_to_view')"
-                class="flex items-center gap-1"
+                class="items-center gap-1 whitespace-nowrap"
             >
                 ENV: {{ $envLabel }}
                 @if ($secondary)
