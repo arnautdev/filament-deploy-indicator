@@ -42,6 +42,25 @@ public function panel(Panel $panel): Panel
 }
 ```
 
+## Conditional visibility
+
+You can control who can see the deploy indicator by using the `->visible()` method when registering the plugin.
+
+### Show only for admins
+
+```php
+use Arnautdev\FilamentDeployIndicator\FilamentDeployIndicatorPlugin;
+
+public function panel(Panel $panel): Panel
+{
+    return $panel
+        ->plugins([
+            FilamentDeployIndicatorPlugin::make()
+                ->visible(fn (): bool => auth()->user()?->is_admin === true),
+        ]);
+}
+```
+
 ## Configuration
 Publish the config file:
 
@@ -61,6 +80,16 @@ Config file: config/filament-deploy-indicator.php
 | `git_root`                   | Root of the git repository             |
 | `env_map`                    | Mapping of env → label + color         |
 | `topbar.show`                | `null`, `commit`, or `deployed_at`     |
+
+
+---
+## Generate deployment info manually
+
+The package provides an Artisan command to generate the deployment metadata JSON file.
+
+```bash
+php artisan filament-deploy-indicator:write
+```
 
 ## Deployment JSON format
 The plugin reads a JSON file like:

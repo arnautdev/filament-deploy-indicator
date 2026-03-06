@@ -2,6 +2,7 @@
 
 namespace Arnautdev\FilamentDeployIndicator;
 
+use Closure;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 use Filament\View\PanelsRenderHook;
@@ -9,16 +10,36 @@ use Illuminate\Support\Facades\View;
 
 class FilamentDeployIndicatorPlugin implements Plugin
 {
+    protected bool | Closure $isVisible = true;
+
     public function getId(): string
     {
         return 'filament-deploy-indicator';
+    }
+
+    public function visible(bool | Closure $condition = true): static
+    {
+        $this->isVisible = $condition;
+
+        return $this;
+    }
+
+    private function isVisible(): bool
+    {
+        return (bool) value($this->isVisible);
     }
 
     public function register(Panel $panel): void
     {
         $panel->renderHook(
             config('filament-deploy-indicator.position', PanelsRenderHook::GLOBAL_SEARCH_BEFORE),
-            fn (): string => View::make('filament-deploy-indicator::indicator')->render(),
+            function (): string {
+                if (! $this->isVisible()) {
+                    return '';
+                }
+
+                return View::make('filament-deploy-indicator::indicator')->render();
+            }
         );
     }
 

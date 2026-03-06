@@ -23,22 +23,22 @@ class WriteDeployInfoCommand extends Command
 
     public function handle(): int
     {
+        $path = $this->option('path') ?: config('filament-deploy-indicator.write_path');
+
         $fromGit = (bool) $this->option('from-git');
         if ($fromGit) {
             $generated = GitDeployInfoGenerator::generate();
 
-            $writePath = config('filament-deploy-indicator.write_path');
-
-            File::ensureDirectoryExists(dirname($writePath));
+            File::ensureDirectoryExists(dirname($path));
             File::put(
-                $writePath,
+                $path,
                 json_encode($generated, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
             );
 
+            $this->info("Deploy info written to: {$path}");
+
             return self::SUCCESS;
         }
-
-        $path = $this->option('path') ?: config('filament-deploy-indicator.write_path');
 
         $data = [
             'environment' => $this->option('env') ?: app()->environment(),
