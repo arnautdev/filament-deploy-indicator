@@ -3,8 +3,8 @@
 Show the current application environment (ENV) and optional latest deployment info in your Filament topbar.
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/arnautdev/filament-deploy-indicator.svg?style=flat-square)](https://packagist.org/packages/arnautdev/filament-deploy-indicator)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/arnautdev/filament-deploy-indicator/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/arnautdev/filament-deploy-indicator/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/arnautdev/filament-deploy-indicator/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/arnautdev/filament-deploy-indicator/actions?query=workflow%3A%22Fix+PHP+code+styling%22+branch%3Amain)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/arnautdev/filament-deploy-indicator/run-tests.yml?branch=5.x&label=tests&style=flat-square)](https://github.com/arnautdev/filament-deploy-indicator/actions?query=workflow%3Arun-tests+branch%3A5.x)
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/arnautdev/filament-deploy-indicator/fix-php-code-style-issues.yml?branch=5.x&label=code%20style&style=flat-square)](https://github.com/arnautdev/filament-deploy-indicator/actions?query=workflow%3A%22Fix+PHP+code+styling%22+branch%3A5.x)
 [![Total Downloads](https://img.shields.io/packagist/dt/arnautdev/filament-deploy-indicator.svg?style=flat-square)](https://packagist.org/packages/arnautdev/filament-deploy-indicator)
 
 ## Features
@@ -69,7 +69,7 @@ php artisan vendor:publish --tag="filament-deploy-indicator-config"
 | `file_path`                  | `storage/app/private/deploy-info.json` | Path to read deployment JSON from               |
 | `write_path`                 | `storage/app/private/deploy-info.json` | Path to write generated JSON to                 |
 | `auto_generate_when_missing` | `true`                               | Generate JSON using git if file is missing         |
-| `git_root`                   | `base_path()`                        | Root of the git repository                         |
+| `git_root`                   | `base_path()`                        | Root of the git repository (env: `DEPLOY_INDICATOR_GIT_ROOT`) |
 | `env_map`                    | See config                           | Mapping of environment → label + Filament color    |
 | `topbar.show`                | `'commit'`                           | `null`, `'commit'`, `'deployed_at'`, `'tag'`, `'branch'` |
 | `topbar.commit_length`       | `7`                                  | Number of commit hash characters to show           |
@@ -83,19 +83,17 @@ The plugin reads deployment metadata from a JSON file. There are two ways to gen
 
 ### Option 1: During deployment (recommended)
 
-Run the command as part of your deployment pipeline. This gives accurate deployment timestamps.
+Run the command as part of your deployment pipeline. Git data (commit, branch, author, message) is read automatically. This also gives accurate deployment timestamps.
 
 ```bash
-php artisan deploy-indicator:write --from-git
+php artisan deploy-indicator:write --env=production
 ```
 
-You can also pass values manually:
+Any option you pass overrides the git value. For example, to set a custom author:
 
 ```bash
 php artisan deploy-indicator:write \
   --env=production \
-  --commit=$GIT_COMMIT \
-  --branch=$GIT_BRANCH \
   --author="CI Bot" \
   --deployed-at="$(date '+%Y-%m-%d %H:%M:%S')"
 ```
@@ -110,21 +108,13 @@ Set `auto_generate_when_missing = true` in config (default). The JSON will be ge
 
 ### GitHub Actions
 
-```yaml
-- name: Write deploy info
-  run: php artisan deploy-indicator:write --from-git --env=production
-```
-
-Or with explicit values:
+Git data is read automatically. Pass `--commit-url` to make the commit hash clickable in the dropdown.
 
 ```yaml
 - name: Write deploy info
   run: |
     php artisan deploy-indicator:write \
       --env=production \
-      --commit=${{ github.sha }} \
-      --branch=${{ github.ref_name }} \
-      --author="${{ github.actor }}" \
       --commit-url="${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}"
 ```
 
@@ -133,32 +123,16 @@ Or with explicit values:
 ```yaml
 deploy:
   script:
-    - php artisan deploy-indicator:write --from-git --env=production
-```
-
-Or with explicit values:
-
-```yaml
-deploy:
-  script:
     - |
       php artisan deploy-indicator:write \
         --env=production \
-        --commit=$CI_COMMIT_SHA \
-        --branch=$CI_COMMIT_REF_NAME \
-        --author="$GITLAB_USER_NAME" \
         --commit-url="$CI_PROJECT_URL/-/commit/$CI_COMMIT_SHA"
 ```
 
 ### Shell / custom script
 
 ```bash
-php artisan deploy-indicator:write \
-  --env=$(php artisan env --no-ansi | awk '{print $NF}') \
-  --commit=$(git rev-parse HEAD) \
-  --branch=$(git rev-parse --abbrev-ref HEAD) \
-  --author="$(git log -1 --pretty=format:'%an')" \
-  --deployed-at="$(date '+%Y-%m-%d %H:%M:%S')"
+php artisan deploy-indicator:write --env=production
 ```
 
 ---
