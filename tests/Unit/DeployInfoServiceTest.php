@@ -22,7 +22,7 @@ it('reads deploy info from configured file path', function () {
         'commit_message' => 'Test message',
     ], JSON_PRETTY_PRINT));
 
-    $data = DeployInfoService::get();
+    $data = app(DeployInfoService::class)->get();
 
     expect($data)->toBeArray()
         ->and($data['commit'])->toBe('abc123')

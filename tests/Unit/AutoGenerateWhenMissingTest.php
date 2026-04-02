@@ -26,7 +26,7 @@ it('generates deploy-info.json when missing and auto-generate is enabled', funct
     config()->set('filament-deploy-indicator.cache_ttl', 30);
     config()->set('filament-deploy-indicator.git_root', realpath(__DIR__ . '/../..'));
 
-    $data = DeployInfoService::get();
+    $data = app(DeployInfoService::class)->get();
 
     expect($data)->toBeArray()->and(File::exists($writePath))->toBeTrue();
 

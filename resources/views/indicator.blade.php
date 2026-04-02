@@ -1,5 +1,4 @@
 @php
-    $deploy = \Arnautdev\FilamentDeployIndicator\Services\DeployInfoService::get();
     $env = app()->environment();
 
     $map = config("filament-deploy-indicator.env_map.$env") ?? config('filament-deploy-indicator.default');
@@ -75,7 +74,7 @@
                 $commitUrl = data_get($deploy, 'commit_url');
             @endphp
 
-            <x-filament::dropdown.list.item @if($commitUrl) href="{{ $commitUrl }}" @endif>
+            <x-filament::dropdown.list.item :href="$commitUrl">
                 <div class="text-xs text-gray-500">{{__('filament-deploy-indicator::deploy-indicator.commit')}}</div>
                 <div class="font-mono text-sm break-all">
                     {{ $deploy['commit'] ?? '-' }}

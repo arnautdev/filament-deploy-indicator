@@ -6,16 +6,16 @@ use Illuminate\Support\Facades\Process;
 
 class GitDeployInfoGenerator
 {
-    public static function canRun(): bool
+    public function canRun(): bool
     {
         $root = (string) config('filament-deploy-indicator.git_root', base_path());
 
         return is_dir($root . DIRECTORY_SEPARATOR . '.git');
     }
 
-    public static function generate(): array
+    public function generate(): array
     {
-        if (! self::canRun()) {
+        if (! $this->canRun()) {
             return [];
         }
 

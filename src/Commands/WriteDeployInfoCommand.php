@@ -21,13 +21,18 @@ class WriteDeployInfoCommand extends Command
 
     protected $description = 'Write deploy-info.json for Filament Deploy Indicator';
 
+    public function __construct(protected GitDeployInfoGenerator $generator)
+    {
+        parent::__construct();
+    }
+
     public function handle(): int
     {
         $path = $this->option('path') ?: config('filament-deploy-indicator.write_path');
 
         $fromGit = (bool) $this->option('from-git');
         if ($fromGit) {
-            $generated = GitDeployInfoGenerator::generate();
+            $generated = $this->generator->generate();
 
             File::ensureDirectoryExists(dirname($path));
             File::put(

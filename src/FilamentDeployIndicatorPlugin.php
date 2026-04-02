@@ -2,6 +2,7 @@
 
 namespace Arnautdev\FilamentDeployIndicator;
 
+use Arnautdev\FilamentDeployIndicator\Services\DeployInfoService;
 use Closure;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
@@ -38,7 +39,9 @@ class FilamentDeployIndicatorPlugin implements Plugin
                     return '';
                 }
 
-                return View::make('filament-deploy-indicator::indicator')->render();
+                return View::make('filament-deploy-indicator::indicator', [
+                    'deploy' => app(DeployInfoService::class)->get(),
+                ])->render();
             }
         );
     }

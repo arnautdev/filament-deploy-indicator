@@ -3,6 +3,8 @@
 namespace Arnautdev\FilamentDeployIndicator;
 
 use Arnautdev\FilamentDeployIndicator\Commands\WriteDeployInfoCommand;
+use Arnautdev\FilamentDeployIndicator\Services\DeployInfoService;
+use Arnautdev\FilamentDeployIndicator\Services\GitDeployInfoGenerator;
 use Arnautdev\FilamentDeployIndicator\Testing\TestsFilamentDeployIndicator;
 use Filament\Support\Assets\Asset;
 use Filament\Support\Assets\Css;
@@ -50,7 +52,11 @@ class FilamentDeployIndicatorServiceProvider extends PackageServiceProvider
         }
     }
 
-    public function packageRegistered(): void {}
+    public function packageRegistered(): void
+    {
+        $this->app->singleton(GitDeployInfoGenerator::class);
+        $this->app->singleton(DeployInfoService::class);
+    }
 
     public function packageBooted(): void
     {
