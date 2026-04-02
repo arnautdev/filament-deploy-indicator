@@ -10,4 +10,6 @@ return [
     'message' => 'Message',
     'tag' => 'Tag',
     'click_to_view' => 'Click to view deployment info',
+    'copy' => 'Copy commit hash',
+    'copied' => 'Copied!',
 ];

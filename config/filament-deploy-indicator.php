@@ -103,9 +103,11 @@ return [
     |--------------------------------------------------------------------------
     |
     | Optionally display a tiny hint near the ENV label.
-    | - null        => show nothing
-    | - 'commit'    => show short commit hash
+    | - null          => show nothing
+    | - 'commit'      => show short commit hash
     | - 'deployed_at' => show deployment time
+    | - 'tag'         => show git tag (e.g. v1.2.3)
+    | - 'branch'      => show branch name
     |
     */
     'topbar' => [

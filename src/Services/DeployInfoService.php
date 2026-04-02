@@ -4,6 +4,7 @@ namespace Arnautdev\FilamentDeployIndicator\Services;
 
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 
 class DeployInfoService
 {
@@ -25,6 +26,8 @@ class DeployInfoService
                 $generated = $this->generator->generate();
 
                 if ($generated === []) {
+                    Log::warning('filament-deploy-indicator: auto_generate_when_missing is enabled but no deploy info could be generated. Check that git is available and git_root is correct.');
+
                     return [];
                 }
 
@@ -42,7 +45,13 @@ class DeployInfoService
             $json = File::get($path);
             $data = json_decode($json, true);
 
-            return is_array($data) ? $data : [];
+            if (! is_array($data)) {
+                Log::warning("filament-deploy-indicator: deploy-info.json at [{$path}] contains invalid JSON.");
+
+                return [];
+            }
+
+            return $data;
         });
     }
 }

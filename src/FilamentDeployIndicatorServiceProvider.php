@@ -2,16 +2,14 @@
 
 namespace Arnautdev\FilamentDeployIndicator;
 
+use Arnautdev\FilamentDeployIndicator\Commands\CheckDeployIndicatorCommand;
 use Arnautdev\FilamentDeployIndicator\Commands\WriteDeployInfoCommand;
 use Arnautdev\FilamentDeployIndicator\Services\DeployInfoService;
 use Arnautdev\FilamentDeployIndicator\Services\GitDeployInfoGenerator;
-use Arnautdev\FilamentDeployIndicator\Testing\TestsFilamentDeployIndicator;
 use Filament\Support\Assets\Asset;
 use Filament\Support\Assets\Css;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
-use Illuminate\Filesystem\Filesystem;
-use Livewire\Features\SupportTesting\Testable;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -24,11 +22,6 @@ class FilamentDeployIndicatorServiceProvider extends PackageServiceProvider
 
     public function configurePackage(Package $package): void
     {
-        /*
-         * This class is a Package Service Provider
-         *
-         * More info: https://github.com/spatie/laravel-package-tools
-         */
         $package->name(static::$name)
             ->hasCommands($this->getCommands())
             ->hasInstallCommand(function (InstallCommand $command) {
@@ -60,31 +53,12 @@ class FilamentDeployIndicatorServiceProvider extends PackageServiceProvider
 
     public function packageBooted(): void
     {
-        // Asset Registration
         FilamentAsset::register(
             $this->getAssets(),
             $this->getAssetPackageName()
         );
 
-        FilamentAsset::registerScriptData(
-            $this->getScriptData(),
-            $this->getAssetPackageName()
-        );
-
-        // Icon Registration
         FilamentIcon::register($this->getIcons());
-
-        // Handle Stubs
-        if (app()->runningInConsole()) {
-            foreach (app(Filesystem::class)->files(__DIR__ . '/../stubs/') as $file) {
-                $this->publishes([
-                    $file->getRealPath() => base_path("stubs/filament-deploy-indicator/{$file->getFilename()}"),
-                ], 'filament-deploy-indicator-stubs');
-            }
-        }
-
-        // Testing
-        Testable::mixin(new TestsFilamentDeployIndicator);
     }
 
     protected function getAssetPackageName(): ?string
@@ -108,6 +82,7 @@ class FilamentDeployIndicatorServiceProvider extends PackageServiceProvider
     protected function getCommands(): array
     {
         return [
+            CheckDeployIndicatorCommand::class,
             WriteDeployInfoCommand::class,
         ];
     }
@@ -119,21 +94,4 @@ class FilamentDeployIndicatorServiceProvider extends PackageServiceProvider
     {
         return [];
     }
-
-    /**
-     * @return array<string>
-     */
-    protected function getRoutes(): array
-    {
-        return [];
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected function getScriptData(): array
-    {
-        return [];
-    }
-
 }

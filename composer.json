@@ -82,9 +82,7 @@
             "providers": [
                 "Arnautdev\\FilamentDeployIndicator\\FilamentDeployIndicatorServiceProvider"
             ],
-            "aliases": {
-                "FilamentDeployIndicator": "Arnautdev\\FilamentDeployIndicator\\Facades\\FilamentDeployIndicator"
-            }
+            "aliases": {}
         }
     },
     "config": {

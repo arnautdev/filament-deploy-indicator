@@ -1,3 +1,9 @@
 .fi-dropdown-list-item-label {
+    display: block !important;
+    width: 100% !important;
     white-space: normal !important;
+}
+
+.fi-topbar-end .fi-deploy-indicator {
+    margin-inline-end: 0.75rem;
 }

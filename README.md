@@ -9,10 +9,12 @@ Show the current application environment (ENV) and optional latest deployment in
 
 ## Features
 
-- Shows current `APP_ENV` (mapped to a short label like `PROD`, `STAGE`, `LOCAL`) in the Filament topbar.
-- Optional small hint next to the label: commit hash or deploy time.
+- Shows current `APP_ENV` (mapped to a short label like `PROD`, `STAGE`, `LOCAL`) with a color-coded badge.
+- Optional hint next to the label: commit hash, deploy time, git tag, or branch name.
+- Click the badge to see full deployment info: commit, branch, author, message, tag, deploy time.
+- Copy commit hash to clipboard with one click.
 - Reads deployment metadata from a JSON file (default: `storage/app/private/deploy-info.json`).
-- Can auto-generate the JSON when missing (using `git`), if enabled.
+- Can auto-generate the JSON from git on first request, or generate it during deployment via Artisan command.
 
 ## Requirements
 
@@ -21,14 +23,13 @@ Show the current application environment (ENV) and optional latest deployment in
 
 ## Installation
 
-Install the package via Composer:
-
 ```bash
 composer require arnautdev/filament-deploy-indicator
 ```
 
 ## Register the plugin
-Add the plugin to your panel:
+
+Add the plugin to your panel provider:
 
 ```php
 use Arnautdev\FilamentDeployIndicator\FilamentDeployIndicatorPlugin;
@@ -44,69 +45,178 @@ public function panel(Panel $panel): Panel
 
 ## Conditional visibility
 
-You can control who can see the deploy indicator by using the `->visible()` method when registering the plugin.
-
-### Show only for admins
+Show the indicator only to specific users:
 
 ```php
-use Arnautdev\FilamentDeployIndicator\FilamentDeployIndicatorPlugin;
-
-public function panel(Panel $panel): Panel
-{
-    return $panel
-        ->plugins([
-            FilamentDeployIndicatorPlugin::make()
-                ->visible(fn (): bool => auth()->user()?->is_admin === true),
-        ]);
-}
+FilamentDeployIndicatorPlugin::make()
+    ->visible(fn (): bool => auth()->user()?->is_admin === true),
 ```
 
 ## Configuration
+
 Publish the config file:
 
-```php
+```bash
 php artisan vendor:publish --tag="filament-deploy-indicator-config"
 ```
-Config file: config/filament-deploy-indicator.php
 
-## Main options
-| Option                       | Description                            |
-| ---------------------------- | -------------------------------------- |
-| `position`                   | Filament render hook position          |
-| `cache_ttl`                  | Cache time in seconds                  |
-| `file_path`                  | Path to deployment JSON                |
-| `auto_generate_when_missing` | Generate JSON using git if missing     |
-| `write_path`                 | Where generated JSON should be written |
-| `git_root`                   | Root of the git repository             |
-| `env_map`                    | Mapping of env → label + color         |
-| `topbar.show`                | `null`, `commit`, or `deployed_at`     |
+### Main options
 
+| Option                       | Default                              | Description                                        |
+| ---------------------------- | ------------------------------------ | -------------------------------------------------- |
+| `position`                   | `GLOBAL_SEARCH_BEFORE`               | Filament render hook position                      |
+| `cache_ttl`                  | `30`                                 | Cache time in seconds                              |
+| `file_path`                  | `storage/app/private/deploy-info.json` | Path to read deployment JSON from               |
+| `write_path`                 | `storage/app/private/deploy-info.json` | Path to write generated JSON to                 |
+| `auto_generate_when_missing` | `true`                               | Generate JSON using git if file is missing         |
+| `git_root`                   | `base_path()`                        | Root of the git repository                         |
+| `env_map`                    | See config                           | Mapping of environment → label + Filament color    |
+| `topbar.show`                | `'commit'`                           | `null`, `'commit'`, `'deployed_at'`, `'tag'`, `'branch'` |
+| `topbar.commit_length`       | `7`                                  | Number of commit hash characters to show           |
+| `topbar.date_format`         | `'d.m H:i'`                          | PHP date format for `deployed_at` hint             |
 
 ---
-## Generate deployment info manually
 
-The package provides an Artisan command to generate the deployment metadata JSON file.
+## Generating deployment info
+
+The plugin reads deployment metadata from a JSON file. There are two ways to generate it.
+
+### Option 1: During deployment (recommended)
+
+Run the command as part of your deployment pipeline. This gives accurate deployment timestamps.
 
 ```bash
-php artisan filament-deploy-indicator:write
+php artisan deploy-indicator:write --from-git
 ```
 
+You can also pass values manually:
+
+```bash
+php artisan deploy-indicator:write \
+  --env=production \
+  --commit=$GIT_COMMIT \
+  --branch=$GIT_BRANCH \
+  --author="CI Bot" \
+  --deployed-at="$(date '+%Y-%m-%d %H:%M:%S')"
+```
+
+### Option 2: Auto-generate on first request
+
+Set `auto_generate_when_missing = true` in config (default). The JSON will be generated from git automatically on the first request if the file is missing. Useful for local development.
+
+---
+
+## CI/CD integration examples
+
+### GitHub Actions
+
+```yaml
+- name: Write deploy info
+  run: php artisan deploy-indicator:write --from-git --env=production
+```
+
+Or with explicit values:
+
+```yaml
+- name: Write deploy info
+  run: |
+    php artisan deploy-indicator:write \
+      --env=production \
+      --commit=${{ github.sha }} \
+      --branch=${{ github.ref_name }} \
+      --author="${{ github.actor }}" \
+      --commit-url="${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}"
+```
+
+### GitLab CI
+
+```yaml
+deploy:
+  script:
+    - php artisan deploy-indicator:write --from-git --env=production
+```
+
+Or with explicit values:
+
+```yaml
+deploy:
+  script:
+    - |
+      php artisan deploy-indicator:write \
+        --env=production \
+        --commit=$CI_COMMIT_SHA \
+        --branch=$CI_COMMIT_REF_NAME \
+        --author="$GITLAB_USER_NAME" \
+        --commit-url="$CI_PROJECT_URL/-/commit/$CI_COMMIT_SHA"
+```
+
+### Shell / custom script
+
+```bash
+php artisan deploy-indicator:write \
+  --env=$(php artisan env --no-ansi | awk '{print $NF}') \
+  --commit=$(git rev-parse HEAD) \
+  --branch=$(git rev-parse --abbrev-ref HEAD) \
+  --author="$(git log -1 --pretty=format:'%an')" \
+  --deployed-at="$(date '+%Y-%m-%d %H:%M:%S')"
+```
+
+---
+
+## Verify your setup
+
+Run the check command to see the current state of the plugin configuration:
+
+```bash
+php artisan deploy-indicator:check
+```
+
+Example output:
+
+```
+Filament Deploy Indicator — Setup Check
+
+  ✓ Config file published
+  ✓ Git repository detected at: /var/www/html
+  ✓ Git info readable (commit: abc1234, branch: main)
+  ✓ deploy-info.json found at: storage/app/private/deploy-info.json
+  ✓ deploy-info.json is valid JSON
+  ✓ Write path is writable: storage/app/private
+
+Current deployment info:
+ +--------------+-----------------------+
+ | Key          | Value                 |
+ +--------------+-----------------------+
+ | environment  | production            |
+ | deployed_at  | 2026-03-05 10:00:00   |
+ | commit       | abc1234...            |
+ | branch       | main                  |
+ | author       | Dmitry                |
+ +--------------+-----------------------+
+```
+
+---
+
 ## Deployment JSON format
-The plugin reads a JSON file like:
+
+The plugin reads a JSON file with this structure:
+
 ```json
 {
-  "environment": "local",
+  "environment": "production",
   "deployed_at": "2026-03-04 16:30:00",
-  "commit": "33de817",
-  "branch": "feature/deploy-indicator",
-  "author": "You",
-  "commit_message": "Local test"
+  "commit": "33de817f4b2c3a1e9d0f8c7b5e2a4d6f8b1c3e5a",
+  "branch": "main",
+  "author": "Dmitry",
+  "commit_message": "initial release",
+  "commit_url": "https://github.com/your/repo/commit/33de817",
+  "tag": "v1.0.0"
 }
 ```
-Default location:
-```
-storage/app/private/deploy-info.json
-```
+
+All fields are optional. Default location: `storage/app/private/deploy-info.json`.
+
+---
 
 ## Testing
 

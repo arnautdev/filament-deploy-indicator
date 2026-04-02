@@ -19,7 +19,10 @@ class GitDeployInfoGenerator
             return [];
         }
 
-        $env = ['GIT_TERMINAL_PROMPT' => '0'];
+        $env = [
+            'GIT_TERMINAL_PROMPT' => '0',
+            'NO_COLOR' => '1',
+        ];
 
         $commit = trim(Process::env($env)->run('git --no-pager rev-parse HEAD')->output());
         if ($commit === '') {
@@ -27,19 +30,19 @@ class GitDeployInfoGenerator
         }
 
         $branchResult = Process::env($env)->run('git --no-pager rev-parse --abbrev-ref HEAD');
-        $branch = $branchResult->successful() ? trim($branchResult->output()) : null;
+        $branch = $branchResult->successful() ? $this->clean($branchResult->output()) : null;
 
         $authorResult = Process::env($env)->run('git --no-pager log -1 --pretty=format:%an');
-        $author = $authorResult->successful() ? trim($authorResult->output()) : null;
+        $author = $authorResult->successful() ? $this->clean($authorResult->output()) : null;
 
         $messageResult = Process::env($env)->run('git --no-pager log -1 --pretty=format:%s');
-        $message = $messageResult->successful() ? trim($messageResult->output()) : null;
+        $message = $messageResult->successful() ? $this->clean($messageResult->output()) : null;
 
         $dateResult = Process::env($env)->run("git --no-pager log -1 --pretty=format:%cd --date=format:'%Y-%m-%d %H:%M:%S'");
-        $commitDate = $dateResult->successful() ? trim($dateResult->output()) : null;
+        $commitDate = $dateResult->successful() ? $this->clean($dateResult->output()) : null;
 
         $tagProcess = Process::env($env)->run('git --no-pager describe --tags --exact-match');
-        $tag = $tagProcess->successful() ? trim($tagProcess->output()) : null;
+        $tag = $tagProcess->successful() ? $this->clean($tagProcess->output()) : null;
 
         return array_filter([
             'environment' => app()->environment(),
@@ -50,5 +53,11 @@ class GitDeployInfoGenerator
             'commit_message' => $message ?: null,
             'tag' => $tag ?: null,
         ], fn ($v) => ! is_null($v) && $v !== '');
+    }
+
+    private function clean(string $output): string
+    {
+        // Strip ANSI escape codes and trim whitespace
+        return trim((string) preg_replace('/\x1b\[[0-9;]*m/', '', $output));
     }
 }
