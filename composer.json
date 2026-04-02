@@ -71,7 +71,9 @@
         "build": "@php vendor/bin/testbench workbench:build --ansi",
         "serve": [
             "Composer\\Config::disableProcessTimeout",
+            "npm run build",
             "@build",
+            "@php vendor/bin/testbench filament:assets --ansi",
             "@php vendor/bin/testbench serve --ansi"
         ]
     },

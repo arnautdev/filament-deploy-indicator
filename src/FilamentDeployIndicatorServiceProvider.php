@@ -5,6 +5,7 @@ namespace Arnautdev\FilamentDeployIndicator;
 use Arnautdev\FilamentDeployIndicator\Commands\WriteDeployInfoCommand;
 use Arnautdev\FilamentDeployIndicator\Testing\TestsFilamentDeployIndicator;
 use Filament\Support\Assets\Asset;
+use Filament\Support\Assets\Css;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentIcon;
 use Illuminate\Filesystem\Filesystem;
@@ -97,9 +98,7 @@ class FilamentDeployIndicatorServiceProvider extends PackageServiceProvider
     protected function getAssets(): array
     {
         return [
-            // AlpineComponent::make('filament-deploy-indicator', __DIR__ . '/../resources/dist/components/filament-deploy-indicator.js'),
-            // Css::make('filament-deploy-indicator-styles', __DIR__ . '/../resources/dist/filament-deploy-indicator.css'),
-            // Js::make('filament-deploy-indicator-scripts', __DIR__ . '/../resources/dist/filament-deploy-indicator.js'),
+            Css::make('filament-deploy-indicator-styles', __DIR__ . '/../resources/dist/filament-deploy-indicator.css'),
         ];
     }
 

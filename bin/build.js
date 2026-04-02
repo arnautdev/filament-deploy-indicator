@@ -50,3 +50,11 @@ compile({
 }).then(() => {
     console.log(`Build completed for filament-deploy-indicator.js`)
 })
+
+compile({
+    ...defaultOptions,
+    entryPoints: ['./resources/css/index.css'],
+    outfile: './resources/dist/filament-deploy-indicator.css',
+}).then(() => {
+    console.log(`Build completed for filament-deploy-indicator.css`)
+})

@@ -103,8 +103,3 @@
         </x-filament::dropdown.list>
     </x-filament::dropdown>
 </div>
-<style>
-    .fi-dropdown-list-item-label {
-        white-space: normal !important;
-    }
-</style>
