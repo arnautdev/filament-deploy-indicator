@@ -32,8 +32,6 @@ class FilamentDeployIndicatorServiceProvider extends PackageServiceProvider
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
                     ->publishConfigFile()
-                    ->publishMigrations()
-                    ->askToRunMigrations()
                     ->askToStarRepoOnGitHub('arnautdev/filament-deploy-indicator');
             });
 
@@ -41,10 +39,6 @@ class FilamentDeployIndicatorServiceProvider extends PackageServiceProvider
 
         if (file_exists($package->basePath("/../config/{$configFileName}.php"))) {
             $package->hasConfigFile();
-        }
-
-        if (file_exists($package->basePath('/../database/migrations'))) {
-            $package->hasMigrations($this->getMigrations());
         }
 
         if (file_exists($package->basePath('/../resources/lang'))) {
@@ -136,13 +130,4 @@ class FilamentDeployIndicatorServiceProvider extends PackageServiceProvider
         return [];
     }
 
-    /**
-     * @return array<string>
-     */
-    protected function getMigrations(): array
-    {
-        return [
-            'create_filament-deploy-indicator_table',
-        ];
-    }
 }

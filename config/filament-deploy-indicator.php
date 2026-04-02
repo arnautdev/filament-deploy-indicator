@@ -69,7 +69,7 @@ return [
     | Override via DEPLOY_INDICATOR_GIT_ROOT if your app lives in a subdirectory.
     |
     */
-    'git_root' => env('DEPLOY_INDICATOR_GIT_ROOT', dirname(__FILE__) . '/..'),
+    'git_root' => env('DEPLOY_INDICATOR_GIT_ROOT', base_path()),
 
     /*
     |--------------------------------------------------------------------------
