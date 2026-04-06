@@ -59,17 +59,17 @@
 
             <x-filament::dropdown.list.item>
                 <div class="text-xs text-gray-500">{{ __('filament-deploy-indicator::deploy-indicator.environment') }}</div>
-                <div class="font-medium">{{ $env }}</div>
+                <div class="font-semibold">{{ $env }}</div>
             </x-filament::dropdown.list.item>
 
             <x-filament::dropdown.list.item>
                 <div class="text-xs text-gray-500">{{ __('filament-deploy-indicator::deploy-indicator.deployed_at') }}</div>
-                <div class="font-medium">{{ $deploy['deployed_at'] ?? '-' }}</div>
+                <div class="font-semibold">{{ $deploy['deployed_at'] ?? '-' }}</div>
             </x-filament::dropdown.list.item>
 
             <x-filament::dropdown.list.item>
                 <div class="text-xs text-gray-500">{{ __('filament-deploy-indicator::deploy-indicator.branch') }}</div>
-                <div class="font-medium">{{ $deploy['branch'] ?? '-' }}</div>
+                <div class="font-semibold">{{ $deploy['branch'] ?? '-' }}</div>
             </x-filament::dropdown.list.item>
 
             @php
@@ -99,18 +99,18 @@
 
             <x-filament::dropdown.list.item>
                 <div class="text-xs text-gray-500">{{ __('filament-deploy-indicator::deploy-indicator.author') }}</div>
-                <div class="font-medium">{{ $deploy['author'] ?? '-' }}</div>
+                <div class="font-semibold">{{ $deploy['author'] ?? '-' }}</div>
             </x-filament::dropdown.list.item>
 
             <x-filament::dropdown.list.item>
                 <div class="text-xs text-gray-500">{{ __('filament-deploy-indicator::deploy-indicator.message') }}</div>
-                <div class="font-medium !break-words">{{ $deploy['commit_message'] ?? '-' }}</div>
+                <div class="font-semibold !break-words">{{ $deploy['commit_message'] ?? '-' }}</div>
             </x-filament::dropdown.list.item>
 
             @if (!empty($deploy['tag']))
                 <x-filament::dropdown.list.item>
                     <div class="text-xs text-gray-500">{{ __('filament-deploy-indicator::deploy-indicator.tag') }}</div>
-                    <div class="font-medium break-words">{{ $deploy['tag'] }}</div>
+                    <div class="font-semibold break-words">{{ $deploy['tag'] }}</div>
                 </x-filament::dropdown.list.item>
             @endif
 
