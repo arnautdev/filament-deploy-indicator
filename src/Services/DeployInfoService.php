@@ -10,6 +10,7 @@ class DeployInfoService
 {
     public function __construct(
         protected GitDeployInfoGenerator $generator,
+        protected DeployHistoryService $history,
     ) {}
 
     public function get(): array
@@ -39,6 +40,8 @@ class DeployInfoService
                     json_encode($generated, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
                 );
 
+                $this->history->record($generated);
+
                 $path = $writePath;
             }
 
@@ -53,5 +56,10 @@ class DeployInfoService
 
             return $data;
         });
+    }
+
+    public function recentHistory(?int $limit = null): array
+    {
+        return $this->history->recent($limit);
     }
 }

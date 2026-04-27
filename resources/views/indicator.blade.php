@@ -114,5 +114,34 @@
                 </x-filament::dropdown.list.item>
             @endif
 
+            @if (!empty($history))
+                <x-filament::dropdown.list.item>
+                    <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                        {{ __('filament-deploy-indicator::deploy-indicator.recent_deploys') }}
+                    </div>
+                    <div class="mt-2 space-y-1.5">
+                        @foreach ($history as $entry)
+                            @php
+                                $entryCommit = data_get($entry, 'commit');
+                                $entryShort = $entryCommit ? \Illuminate\Support\Str::limit($entryCommit, 7, '') : null;
+                                $entryAuthor = data_get($entry, 'author');
+                                $entryDate = data_get($entry, 'deployed_at') ?? data_get($entry, 'recorded_at');
+                            @endphp
+                            <div class="flex items-baseline gap-2 text-xs">
+                                @if ($entryShort)
+                                    <span class="font-mono text-gray-700 dark:text-gray-300">{{ $entryShort }}</span>
+                                @endif
+                                @if ($entryAuthor)
+                                    <span class="truncate text-gray-500">{{ $entryAuthor }}</span>
+                                @endif
+                                @if ($entryDate)
+                                    <span class="ml-auto whitespace-nowrap text-gray-400">{{ $entryDate }}</span>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </x-filament::dropdown.list.item>
+            @endif
+
         </x-filament::dropdown.list>
 </x-filament::dropdown>

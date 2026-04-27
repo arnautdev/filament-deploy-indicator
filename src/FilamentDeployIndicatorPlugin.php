@@ -39,8 +39,11 @@ class FilamentDeployIndicatorPlugin implements Plugin
                     return '';
                 }
 
+                $service = app(DeployInfoService::class);
+
                 return View::make('filament-deploy-indicator::indicator', [
-                    'deploy' => app(DeployInfoService::class)->get(),
+                    'deploy' => $service->get(),
+                    'history' => $service->recentHistory(),
                 ])->render();
             }
         );

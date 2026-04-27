@@ -99,6 +99,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Deploy history
+    |--------------------------------------------------------------------------
+    |
+    | Append-only JSONL log of past deploys. Each new deploy is recorded
+    | (deduplicated by commit hash). Useful to see who/what/when in the
+    | Filament topbar without leaving the admin.
+    |
+    */
+    'history' => [
+        'enabled' => true,
+        'path' => storage_path('app/private/deploy-history.jsonl'),
+        'max_entries' => 100,
+        'show_in_dropdown' => 5,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Topbar hint
     |--------------------------------------------------------------------------
     |
