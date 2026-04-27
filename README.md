@@ -15,6 +15,7 @@ Show the current application environment (ENV) and optional latest deployment in
 - Copy commit hash to clipboard with one click.
 - Reads deployment metadata from a JSON file (default: `storage/app/private/deploy-info.json`).
 - Can auto-generate the JSON from git on first request, or generate it during deployment via Artisan command.
+- Records every deploy to an append-only history log and shows the last few in the dropdown.
 
 ## Requirements
 
@@ -74,6 +75,10 @@ php artisan vendor:publish --tag="filament-deploy-indicator-config"
 | `topbar.show`                | `'commit'`                           | `null`, `'commit'`, `'deployed_at'`, `'tag'`, `'branch'` |
 | `topbar.commit_length`       | `7`                                  | Number of commit hash characters to show           |
 | `topbar.date_format`         | `'d.m H:i'`                          | PHP date format for `deployed_at` hint             |
+| `history.enabled`            | `true`                               | Record deploys to an append-only history log       |
+| `history.path`               | `storage/app/private/deploy-history.jsonl` | Path of the JSONL history file               |
+| `history.max_entries`        | `100`                                | How many entries to keep (older ones are trimmed)  |
+| `history.show_in_dropdown`   | `5`                                  | How many recent deploys to show in the dropdown    |
 
 ---
 
@@ -101,6 +106,23 @@ php artisan deploy-indicator:write \
 ### Option 2: Auto-generate on first request
 
 Set `auto_generate_when_missing = true` in config (default). The JSON will be generated from git automatically on the first request if the file is missing. Useful for local development.
+
+---
+
+## Deploy history
+
+Every time deploy info is written (via `deploy-indicator:write` or auto-generate), the package appends a snapshot to an append-only JSONL log at `storage/app/private/deploy-history.jsonl`.
+
+- **Deduped by commit hash** — running the command twice for the same commit does not create duplicate entries.
+- **Retention** — capped at `history.max_entries` (default `100`). Older entries are trimmed automatically.
+- **Shown in the dropdown** — under the current deploy info, a "Recent deploys" section lists the last `history.show_in_dropdown` entries (default `5`) in `commit · author · deployed_at` format.
+- **Disable** — set `history.enabled` to `false` in config.
+
+Each line in the JSONL file is a self-contained JSON object, e.g.:
+
+```json
+{"environment":"production","deployed_at":"2026-04-27 10:00:00","commit":"abc123","branch":"main","author":"Dmitry","commit_message":"...","recorded_at":"2026-04-27 10:00:01"}
+```
 
 ---
 
