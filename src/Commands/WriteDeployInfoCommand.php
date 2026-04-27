@@ -2,6 +2,7 @@
 
 namespace Arnautdev\FilamentDeployIndicator\Commands;
 
+use Arnautdev\FilamentDeployIndicator\Services\DeployHistoryService;
 use Arnautdev\FilamentDeployIndicator\Services\GitDeployInfoGenerator;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
@@ -20,8 +21,10 @@ class WriteDeployInfoCommand extends Command
 
     protected $description = 'Write deploy-info.json for Filament Deploy Indicator';
 
-    public function __construct(protected GitDeployInfoGenerator $generator)
-    {
+    public function __construct(
+        protected GitDeployInfoGenerator $generator,
+        protected DeployHistoryService $history,
+    ) {
         parent::__construct();
     }
 
@@ -51,6 +54,8 @@ class WriteDeployInfoCommand extends Command
 
         File::ensureDirectoryExists(dirname((string) $path));
         File::put($path, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
+        $this->history->record($data);
 
         $this->info("Deploy info written to: {$path}");
 

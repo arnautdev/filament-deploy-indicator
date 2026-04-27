@@ -12,4 +12,5 @@ return [
     'click_to_view' => 'Click to view deployment info',
     'copy' => 'Copy commit hash',
     'copied' => 'Copied!',
+    'recent_deploys' => 'Recent deploys',
 ];
