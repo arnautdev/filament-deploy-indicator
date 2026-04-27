@@ -41,7 +41,7 @@ class WriteDeployInfoCommand extends Command
             'author' => $this->option('author'),
             'commit_message' => $this->option('message'),
             'commit_url' => $this->option('commit-url'),
-        ], fn ($v) => ! is_null($v) && $v !== '');
+        ], fn (bool | float | int | string | array | null $v): bool => ! is_null($v) && $v !== '');
 
         $data = array_merge($base, $overrides);
 
@@ -49,7 +49,7 @@ class WriteDeployInfoCommand extends Command
         $data['environment'] ??= app()->environment();
         $data['deployed_at'] ??= now()->toDateTimeString();
 
-        File::ensureDirectoryExists(dirname($path));
+        File::ensureDirectoryExists(dirname((string) $path));
         File::put($path, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
         $this->info("Deploy info written to: {$path}");

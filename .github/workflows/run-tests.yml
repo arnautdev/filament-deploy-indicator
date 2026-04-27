@@ -13,24 +13,39 @@ jobs:
       fail-fast: true
       matrix:
         os: [ubuntu-latest, windows-latest]
-        php: [8.4, 8.3, 8.2]
-        laravel: [12.*, 11.*]
+        php: [8.2, 8.3, 8.4]
+        laravel: [11.*, 12.*, 13.*]
+        filament: [4.*, 5.*]
         stability: [prefer-lowest, prefer-stable]
         include:
-          - laravel: 12.*
-            testbench: 10.*
-            carbon: 3.*
-            collision: 8.*
           - laravel: 11.*
             testbench: 9.*
             carbon: 3.*
             collision: 8.*
+          - laravel: 12.*
+            testbench: 10.*
+            carbon: 3.*
+            collision: 8.*
+          - laravel: 13.*
+            testbench: 11.*
+            carbon: 3.*
+            collision: 8.*
+        exclude:
+          # Filament 5.x requires Laravel 12+
+          - laravel: 11.*
+            filament: 5.*
+          # Filament 4.x does not support Laravel 13
+          - laravel: 13.*
+            filament: 4.*
+          # Laravel 13 requires PHP 8.3+
+          - laravel: 13.*
+            php: 8.2
 
-    name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }} - ${{ matrix.os }}
+    name: P${{ matrix.php }} - L${{ matrix.laravel }} - F${{ matrix.filament }} - ${{ matrix.stability }} - ${{ matrix.os }}
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -46,7 +61,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" "nesbot/carbon:${{ matrix.carbon }}" --no-interaction --no-update
+          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" "filament/filament:${{ matrix.filament }}" "nesbot/carbon:${{ matrix.carbon }}" --no-interaction --no-update
           composer update --${{ matrix.stability }} --prefer-dist --no-interaction
 
       - name: List Installed Dependencies
