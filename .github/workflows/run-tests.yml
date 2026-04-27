@@ -63,6 +63,7 @@ jobs:
           echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
       - name: Configure composer to ignore old Filament tables advisory
+        shell: bash
         run: composer config --json audit.ignore '["PKSA-5bdf-2x61-v43c"]'
 
       - name: Install dependencies
