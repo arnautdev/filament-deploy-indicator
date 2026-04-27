@@ -17,7 +17,7 @@ class DeployInfoService
         $path = config('filament-deploy-indicator.file_path');
         $ttl = (int) config('filament-deploy-indicator.cache_ttl', 30);
 
-        return Cache::remember('deploy-indicator:deploy-info', $ttl, function () use ($path) {
+        return Cache::remember('deploy-indicator:deploy-info', $ttl, function () use ($path): array {
             if (! $path || ! File::exists($path)) {
                 if (! config('filament-deploy-indicator.auto_generate_when_missing')) {
                     return [];

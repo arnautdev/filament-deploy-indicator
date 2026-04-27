@@ -42,7 +42,7 @@ class CheckDeployIndicatorCommand extends Command
 
         if ($gitAvailable) {
             $generated = $this->generator->generate();
-            $gitReadable = ! empty($generated);
+            $gitReadable = $generated !== [];
             $shortCommit = substr($generated['commit'] ?? '', 0, 7);
             $this->checkLine(
                 $gitReadable,
@@ -70,7 +70,7 @@ class CheckDeployIndicatorCommand extends Command
         }
 
         $writePath = config('filament-deploy-indicator.write_path');
-        $writeDir = dirname($writePath);
+        $writeDir = dirname((string) $writePath);
         $writable = is_dir($writeDir) && is_writable($writeDir);
         $this->checkLine(
             $writable,
@@ -79,12 +79,12 @@ class CheckDeployIndicatorCommand extends Command
         );
 
         $deploy = $this->service->get();
-        if (! empty($deploy)) {
+        if ($deploy !== []) {
             $this->newLine();
             $this->info('Current deployment info:');
             $this->table(
                 ['Key', 'Value'],
-                collect($deploy)->map(fn ($v, $k) => [$k, $v])->values()->all()
+                collect($deploy)->map(fn ($v, $k): array => [$k, $v])->values()->all()
             );
         }
 

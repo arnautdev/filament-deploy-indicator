@@ -52,7 +52,7 @@ class GitDeployInfoGenerator
             'author' => $author ?: null,
             'commit_message' => $message ?: null,
             'tag' => $tag ?: null,
-        ], fn ($v) => ! is_null($v) && $v !== '');
+        ], fn (bool | string | null $v): bool => ! is_null($v) && $v !== '');
     }
 
     private function clean(string $output): string
