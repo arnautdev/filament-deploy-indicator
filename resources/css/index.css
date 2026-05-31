@@ -7,3 +7,100 @@
 .fi-topbar-end .fi-deploy-indicator {
     margin-inline-end: 0.75rem;
 }
+
+/*
+ * Width comes from the dropdown's `width="md"` prop (Filament's `max-w-md!`),
+ * and `shift` keeps the panel inside the viewport. On narrow screens cap the
+ * width below the viewport so it never touches the edges — `!important` is
+ * required to beat Filament's own `max-w-*!` utility.
+ */
+@media (max-width: 30rem) {
+    .fi-deploy-indicator .fi-dropdown-panel {
+        max-width: calc(100vw - 2rem) !important;
+    }
+}
+
+/*
+ * Filament 4 (Tailwind v4) ships only the utilities it uses itself, and
+ * `font-semibold` only as scoped `.fi-*` variants. Redeclare the few text
+ * utilities this plugin relies on, scoped to its own dropdown so they reach
+ * every value (the panel is a descendant of the `.fi-deploy-indicator` root).
+ */
+.fi-deploy-indicator .font-semibold {
+    font-weight: var(--font-weight-semibold, 600);
+}
+
+.fi-deploy-indicator .uppercase {
+    text-transform: uppercase;
+}
+
+.fi-deploy-indicator .tracking-wide {
+    letter-spacing: 0.025em;
+}
+
+.fi-deploy-indicator .font-mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+        "Liberation Mono", "Courier New", monospace;
+}
+
+.fi-deploy-indicator .break-words,
+.fi-deploy-indicator .break-all {
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+/*
+ * Layout utilities the plugin's markup relies on but Filament doesn't ship
+ * globally (it only generates the utilities used in its own views). Without
+ * these the commit row isn't a flex container, so the copy button drops below
+ * the hash instead of sitting to its right.
+ */
+.fi-deploy-indicator .flex {
+    display: flex;
+}
+
+.fi-deploy-indicator .w-full {
+    width: 100%;
+}
+
+.fi-deploy-indicator .items-start {
+    align-items: flex-start;
+}
+
+.fi-deploy-indicator .items-baseline {
+    align-items: baseline;
+}
+
+.fi-deploy-indicator .gap-2 {
+    gap: 0.5rem;
+}
+
+.fi-deploy-indicator .min-w-0 {
+    min-width: 0;
+}
+
+.fi-deploy-indicator .flex-1 {
+    flex: 1 1 0%;
+}
+
+.fi-deploy-indicator .ml-auto {
+    margin-left: auto;
+}
+
+.fi-deploy-indicator .mt-2 {
+    margin-top: 0.5rem;
+}
+
+.fi-deploy-indicator .space-y-1\.5 > * + * {
+    margin-top: 0.375rem;
+}
+
+.fi-deploy-indicator .truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fi-deploy-indicator .whitespace-nowrap {
+    white-space: nowrap;
+}

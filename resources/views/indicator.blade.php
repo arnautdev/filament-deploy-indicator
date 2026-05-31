@@ -33,115 +33,163 @@
     }
 @endphp
 
-<x-filament::dropdown width="sm" placement="bottom-start" class="fi-deploy-indicator">
-        <x-slot name="trigger">
-            <x-filament::button
-                size="sm"
-                :color="$color"
-                icon="heroicon-m-server-stack"
-                :tooltip="__('filament-deploy-indicator::deploy-indicator.click_to_view')"
-                class="items-center gap-1 whitespace-nowrap"
+<x-filament::dropdown width="md" placement="bottom-start" shift class="fi-deploy-indicator">
+    <x-slot name="trigger">
+        <x-filament::button
+            size="sm"
+            :color="$color"
+            icon="heroicon-m-server-stack"
+            class="items-center gap-1 whitespace-nowrap"
+        >
+            ENV: {{ $envLabel }}
+            @if ($secondary)
+                <span class="opacity-70">•</span>
+                <span class="font-mono opacity-80">{{ $secondary }}</span>
+            @endif
+            <x-heroicon-m-chevron-down class="w-3 h-3 opacity-70" />
+        </x-filament::button>
+    </x-slot>
+
+    <x-filament::dropdown.header>
+        {{ __('filament-deploy-indicator::deploy-indicator.deployment_info') }}
+    </x-filament::dropdown.header>
+
+    <x-filament::dropdown.list>
+        <x-filament::dropdown.list.item>
+            <div class="text-xs text-gray-500">{{ __('filament-deploy-indicator::deploy-indicator.environment') }}</div>
+            <div class="font-semibold">{{ $env }}</div>
+        </x-filament::dropdown.list.item>
+    </x-filament::dropdown.list>
+
+    <x-filament::dropdown.list>
+        <x-filament::dropdown.list.item>
+            <div class="text-xs text-gray-500">{{ __('filament-deploy-indicator::deploy-indicator.deployed_at') }}</div>
+            <div class="font-semibold">{{ $deploy['deployed_at'] ?? '-' }}</div>
+        </x-filament::dropdown.list.item>
+    </x-filament::dropdown.list>
+
+    <x-filament::dropdown.list>
+        <x-filament::dropdown.list.item>
+            <div class="text-xs text-gray-500">{{ __('filament-deploy-indicator::deploy-indicator.branch') }}</div>
+            <div class="font-semibold">{{ $deploy['branch'] ?? '-' }}</div>
+        </x-filament::dropdown.list.item>
+    </x-filament::dropdown.list>
+
+    @php
+        $commit = data_get($deploy, 'commit');
+        $commitUrl = data_get($deploy, 'commit_url');
+        $commitJs = \Illuminate\Support\Js::from($commit);
+    @endphp
+
+    <x-filament::dropdown.list>
+        <x-filament::dropdown.list.item tag="div">
+            <div
+                x-data="{
+                    copied: false,
+                    copy(text) {
+                        const done = () => { this.copied = true; setTimeout(() => this.copied = false, 2000) }
+                        if (navigator.clipboard && window.isSecureContext) {
+                            navigator.clipboard.writeText(text).then(done).catch(() => {})
+                        } else {
+                            const ta = document.createElement('textarea')
+                            ta.value = text
+                            ta.style.position = 'fixed'
+                            ta.style.opacity = '0'
+                            document.body.appendChild(ta)
+                            ta.select()
+                            try { document.execCommand('copy'); done() } finally { ta.remove() }
+                        }
+                    },
+                }"
+                class="flex w-full items-start gap-2"
             >
-                ENV: {{ $envLabel }}
-                @if ($secondary)
-                    <span class="opacity-70">•</span>
-                    <span class="font-mono opacity-80">{{ $secondary }}</span>
-                @endif
-                <x-heroicon-m-chevron-down class="w-3 h-3 opacity-70" />
-            </x-filament::button>
-        </x-slot>
-
-        <x-filament::dropdown.header>
-            {{ __('filament-deploy-indicator::deploy-indicator.deployment_info') }}
-        </x-filament::dropdown.header>
-
-        <x-filament::dropdown.list class="w-[420px] max-w-[90vw]">
-
-            <x-filament::dropdown.list.item>
-                <div class="text-xs text-gray-500">{{ __('filament-deploy-indicator::deploy-indicator.environment') }}</div>
-                <div class="font-semibold">{{ $env }}</div>
-            </x-filament::dropdown.list.item>
-
-            <x-filament::dropdown.list.item>
-                <div class="text-xs text-gray-500">{{ __('filament-deploy-indicator::deploy-indicator.deployed_at') }}</div>
-                <div class="font-semibold">{{ $deploy['deployed_at'] ?? '-' }}</div>
-            </x-filament::dropdown.list.item>
-
-            <x-filament::dropdown.list.item>
-                <div class="text-xs text-gray-500">{{ __('filament-deploy-indicator::deploy-indicator.branch') }}</div>
-                <div class="font-semibold">{{ $deploy['branch'] ?? '-' }}</div>
-            </x-filament::dropdown.list.item>
-
-            @php
-                $commit = data_get($deploy, 'commit');
-                $commitUrl = data_get($deploy, 'commit_url');
-            @endphp
-
-            <x-filament::dropdown.list.item :href="$commitUrl">
-                <div x-data="{ copied: false }" class="flex w-full items-start gap-2">
-                    <div class="min-w-0 flex-1">
-                        <div class="text-xs text-gray-500">{{ __('filament-deploy-indicator::deploy-indicator.commit') }}</div>
-                        <div class="break-all font-mono text-sm">{{ $commit ?? '-' }}</div>
-                    </div>
-                    @if ($commit)
-                        <button
-                            type="button"
-                            @click.prevent="navigator.clipboard.writeText('{{ $commit }}').then(() => { copied = true; setTimeout(() => copied = false, 2000) })"
-                            class="mt-0.5 flex-shrink-0 rounded p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/5 dark:hover:text-gray-300"
-                            :title="copied ? '{{ __('filament-deploy-indicator::deploy-indicator.copied') }}' : '{{ __('filament-deploy-indicator::deploy-indicator.copy') }}'"
-                        >
-                            <x-heroicon-m-clipboard-document x-show="!copied" class="h-4 w-4" />
-                            <x-heroicon-m-check x-show="copied" class="h-4 w-4 text-green-500" />
-                        </button>
+                <div class="min-w-0 flex-1">
+                    <div
+                        class="text-xs text-gray-500">{{ __('filament-deploy-indicator::deploy-indicator.commit') }}</div>
+                    @if ($commitUrl)
+                        <a href="{{ $commitUrl }}" target="_blank" rel="noopener"
+                           class="break-all font-mono font-semibold hover:underline">{{ $commit ?? '-' }}</a>
+                    @else
+                        <div class="break-all font-mono font-semibold">{{ $commit ?? '-' }}</div>
                     @endif
                 </div>
-            </x-filament::dropdown.list.item>
+                @if ($commit)
+                    <x-filament::icon-button
+                        icon="heroicon-m-clipboard-document"
+                        color="gray"
+                        size="sm"
+                        x-show="!copied"
+                        @click.prevent.stop="copy({{ $commitJs }})"
+                        :label="__('filament-deploy-indicator::deploy-indicator.copy')"
+                        :tooltip="__('filament-deploy-indicator::deploy-indicator.copy')"
+                    />
+                    <x-filament::icon-button
+                        icon="heroicon-m-check"
+                        color="success"
+                        size="sm"
+                        x-show="copied"
+                        x-cloak
+                        tag="span"
+                        :label="__('filament-deploy-indicator::deploy-indicator.copied')"
+                        :tooltip="__('filament-deploy-indicator::deploy-indicator.copied')"
+                    />
+                @endif
+            </div>
+        </x-filament::dropdown.list.item>
+    </x-filament::dropdown.list>
 
+    <x-filament::dropdown.list>
+        <x-filament::dropdown.list.item>
+            <div class="text-xs text-gray-500">{{ __('filament-deploy-indicator::deploy-indicator.author') }}</div>
+            <div class="font-semibold">{{ $deploy['author'] ?? '-' }}</div>
+        </x-filament::dropdown.list.item>
+    </x-filament::dropdown.list>
+
+    <x-filament::dropdown.list>
+        <x-filament::dropdown.list.item>
+            <div class="text-xs text-gray-500">{{ __('filament-deploy-indicator::deploy-indicator.message') }}</div>
+            <div class="font-semibold break-words">{{ $deploy['commit_message'] ?? '-' }}</div>
+        </x-filament::dropdown.list.item>
+    </x-filament::dropdown.list>
+
+    @if (!empty($deploy['tag']))
+        <x-filament::dropdown.list>
             <x-filament::dropdown.list.item>
-                <div class="text-xs text-gray-500">{{ __('filament-deploy-indicator::deploy-indicator.author') }}</div>
-                <div class="font-semibold">{{ $deploy['author'] ?? '-' }}</div>
+                <div class="text-xs text-gray-500">{{ __('filament-deploy-indicator::deploy-indicator.tag') }}</div>
+                <div class="font-semibold break-words">{{ $deploy['tag'] }}</div>
             </x-filament::dropdown.list.item>
-
-            <x-filament::dropdown.list.item>
-                <div class="text-xs text-gray-500">{{ __('filament-deploy-indicator::deploy-indicator.message') }}</div>
-                <div class="font-semibold !break-words">{{ $deploy['commit_message'] ?? '-' }}</div>
-            </x-filament::dropdown.list.item>
-
-            @if (!empty($deploy['tag']))
-                <x-filament::dropdown.list.item>
-                    <div class="text-xs text-gray-500">{{ __('filament-deploy-indicator::deploy-indicator.tag') }}</div>
-                    <div class="font-semibold break-words">{{ $deploy['tag'] }}</div>
-                </x-filament::dropdown.list.item>
-            @endif
-
-            @if (!empty($history))
-                <x-filament::dropdown.list.item>
-                    <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                        {{ __('filament-deploy-indicator::deploy-indicator.recent_deploys') }}
-                    </div>
-                    <div class="mt-2 space-y-1.5">
-                        @foreach ($history as $entry)
-                            @php
-                                $entryCommit = data_get($entry, 'commit');
-                                $entryShort = $entryCommit ? \Illuminate\Support\Str::limit($entryCommit, 7, '') : null;
-                                $entryAuthor = data_get($entry, 'author');
-                                $entryDate = data_get($entry, 'deployed_at') ?? data_get($entry, 'recorded_at');
-                            @endphp
-                            <div class="flex items-baseline gap-2 text-xs">
-                                @if ($entryShort)
-                                    <span class="font-mono text-gray-700 dark:text-gray-300">{{ $entryShort }}</span>
-                                @endif
-                                @if ($entryAuthor)
-                                    <span class="truncate text-gray-500">{{ $entryAuthor }}</span>
-                                @endif
-                                @if ($entryDate)
-                                    <span class="ml-auto whitespace-nowrap text-gray-400">{{ $entryDate }}</span>
-                                @endif
-                            </div>
-                        @endforeach
-                    </div>
-                </x-filament::dropdown.list.item>
-            @endif
-
         </x-filament::dropdown.list>
+    @endif
+
+    @if (!empty($history))
+        <x-filament::dropdown.list>
+            <x-filament::dropdown.list.item>
+                <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    {{ __('filament-deploy-indicator::deploy-indicator.recent_deploys') }}
+                </div>
+                <div class="mt-2 space-y-1.5">
+                    @foreach ($history as $entry)
+                        @php
+                            $entryCommit = data_get($entry, 'commit');
+                            $entryShort = $entryCommit ? \Illuminate\Support\Str::limit($entryCommit, 7, '') : null;
+                            $entryAuthor = data_get($entry, 'author');
+                            $entryDate = data_get($entry, 'deployed_at') ?? data_get($entry, 'recorded_at');
+                        @endphp
+                        <div class="flex items-baseline gap-2 text-xs">
+                            @if ($entryShort)
+                                <span
+                                    class="font-mono font-semibold text-gray-700 dark:text-gray-300">{{ $entryShort }}</span>
+                            @endif
+                            @if ($entryAuthor)
+                                <span class="truncate text-gray-500">{{ $entryAuthor }}</span>
+                            @endif
+                            @if ($entryDate)
+                                <span class="ml-auto whitespace-nowrap text-gray-400">{{ $entryDate }}</span>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </x-filament::dropdown.list.item>
+        </x-filament::dropdown.list>
+    @endif
 </x-filament::dropdown>

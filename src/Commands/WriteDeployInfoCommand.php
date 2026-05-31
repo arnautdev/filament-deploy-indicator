@@ -30,7 +30,9 @@ class WriteDeployInfoCommand extends Command
 
     public function handle(): int
     {
-        $path = $this->option('path') ?: config('filament-deploy-indicator.write_path');
+        $path = $this->option('path')
+            ?: config('filament-deploy-indicator.write_path')
+            ?: config('filament-deploy-indicator.file_path');
 
         // Start with git data as base (if available)
         $base = $this->generator->generate();
