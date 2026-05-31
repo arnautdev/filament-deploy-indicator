@@ -69,7 +69,8 @@ class CheckDeployIndicatorCommand extends Command
             );
         }
 
-        $writePath = config('filament-deploy-indicator.write_path');
+        $writePath = config('filament-deploy-indicator.write_path')
+            ?: config('filament-deploy-indicator.file_path');
         $writeDir = dirname((string) $writePath);
         $writable = is_dir($writeDir) && is_writable($writeDir);
         $this->checkLine(

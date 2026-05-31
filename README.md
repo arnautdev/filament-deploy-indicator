@@ -55,7 +55,66 @@ FilamentDeployIndicatorPlugin::make()
 
 ## Configuration
 
-Publish the config file:
+Everything is configurable two ways: publish the config file, or chain fluent
+methods on the plugin (Filament style). Fluent methods override the published
+config at runtime.
+
+### Fluent configuration
+
+```php
+FilamentDeployIndicatorPlugin::make()
+    ->setPosition('panels::topbar.start')        // render hook position
+    ->setCacheTtl(300)                            // cache seconds
+    ->setFilePath(storage_path('app/deploy.json'))// read path
+    ->setWritePath(storage_path('app/deploy.json'))// write path (auto-gen / command)
+    ->setGitRoot(base_path())                     // git repo root
+    ->setAutoGenerateWhenMissing(true)            // generate from git if missing
+
+    // ENV badge
+    ->setDefaultLabel('ENV')                      // fallback label
+    ->setDefaultColor('gray')                     // fallback color
+    ->setEnvMap([                                 // replace whole map
+        'production' => ['label' => 'PROD', 'color' => 'danger'],
+    ])
+    ->mapEnv('qa', 'QA', 'warning')               // add/override one env
+
+    // Topbar hint
+    ->setTopbarHint('commit')                     // null|commit|deployed_at|tag|branch
+    ->setCommitLength(7)                           // commit hash chars
+    ->setDateFormat('d.m H:i')                     // deployed_at format
+
+    // Deploy history
+    ->setHistoryEnabled(true)
+    ->setHistoryPath(storage_path('app/private/deploy-history.jsonl'))
+    ->setHistoryMaxEntries(100)
+    ->setHistoryShowInDropdown(5)
+
+    // Conditional visibility
+    ->visible(fn (): bool => auth()->user()?->is_admin === true),
+```
+
+| Method                       | Config key                    |
+| ---------------------------- | ----------------------------- |
+| `setPosition()`              | `position`                    |
+| `setCacheTtl()`              | `cache_ttl`                   |
+| `setFilePath()`              | `file_path`                   |
+| `setWritePath()`             | `write_path`                  |
+| `setGitRoot()`               | `git_root`                    |
+| `setAutoGenerateWhenMissing()` | `auto_generate_when_missing` |
+| `setDefaultLabel()`          | `default.label`               |
+| `setDefaultColor()`          | `default.color`               |
+| `setEnvMap()`                | `env_map`                     |
+| `mapEnv()`                   | `env_map.{env}`               |
+| `setTopbarHint()`            | `topbar.show`                 |
+| `setCommitLength()`          | `topbar.commit_length`        |
+| `setDateFormat()`            | `topbar.date_format`          |
+| `setHistoryEnabled()`        | `history.enabled`             |
+| `setHistoryPath()`           | `history.path`                |
+| `setHistoryMaxEntries()`     | `history.max_entries`         |
+| `setHistoryShowInDropdown()` | `history.show_in_dropdown`    |
+| `visible()`                  | (runtime only)                |
+
+### Published config file
 
 ```bash
 php artisan vendor:publish --tag="filament-deploy-indicator-config"
@@ -68,7 +127,7 @@ php artisan vendor:publish --tag="filament-deploy-indicator-config"
 | `position`                   | `GLOBAL_SEARCH_BEFORE`               | Filament render hook position                      |
 | `cache_ttl`                  | `30`                                 | Cache time in seconds                              |
 | `file_path`                  | `storage/app/private/deploy-info.json` | Path to read deployment JSON from               |
-| `write_path`                 | `storage/app/private/deploy-info.json` | Path to write generated JSON to                 |
+| `write_path`                 | `null` (falls back to `file_path`)   | Path to write generated JSON to                    |
 | `auto_generate_when_missing` | `true`                               | Generate JSON using git if file is missing         |
 | `git_root`                   | `base_path()`                        | Root of the git repository (env: `DEPLOY_INDICATOR_GIT_ROOT`) |
 | `env_map`                    | See config                           | Mapping of environment → label + Filament color    |

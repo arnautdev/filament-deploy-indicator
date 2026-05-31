@@ -56,9 +56,10 @@ return [
     |--------------------------------------------------------------------------
     |
     | Where the auto-generated JSON should be saved.
+    | When null, falls back to `file_path` above.
     |
     */
-    'write_path' => storage_path('app/private/deploy-info.json'),
+    'write_path' => null,
 
     /*
     |--------------------------------------------------------------------------
