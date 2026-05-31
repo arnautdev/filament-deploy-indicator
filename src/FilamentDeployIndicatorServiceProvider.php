@@ -4,7 +4,10 @@ namespace Arnautdev\FilamentDeployIndicator;
 
 use Arnautdev\FilamentDeployIndicator\Commands\CheckDeployIndicatorCommand;
 use Arnautdev\FilamentDeployIndicator\Commands\WriteDeployInfoCommand;
+use Arnautdev\FilamentDeployIndicator\Services\DeployInfoGeneratorManager;
 use Arnautdev\FilamentDeployIndicator\Services\DeployInfoService;
+use Arnautdev\FilamentDeployIndicator\Services\Generators\Contracts\DeployInfoGenerator;
+use Arnautdev\FilamentDeployIndicator\Services\Generators\StaticDeployInfoGenerator;
 use Arnautdev\FilamentDeployIndicator\Services\GitDeployInfoGenerator;
 use Filament\Support\Assets\Asset;
 use Filament\Support\Assets\Css;
@@ -48,6 +51,16 @@ class FilamentDeployIndicatorServiceProvider extends PackageServiceProvider
     public function packageRegistered(): void
     {
         $this->app->singleton(GitDeployInfoGenerator::class);
+        $this->app->singleton(StaticDeployInfoGenerator::class);
+        $this->app->singleton(DeployInfoGeneratorManager::class);
+
+        // Resolve the configured driver (git | static | composite array) into
+        // the generator the rest of the package depends on.
+        $this->app->singleton(
+            DeployInfoGenerator::class,
+            fn ($app): DeployInfoGenerator => $app->make(DeployInfoGeneratorManager::class)->make(),
+        );
+
         $this->app->singleton(DeployInfoService::class);
     }
 

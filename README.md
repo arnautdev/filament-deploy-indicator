@@ -101,6 +101,8 @@ FilamentDeployIndicatorPlugin::make()
 | `setWritePath()`             | `write_path`                  |
 | `setGitRoot()`               | `git_root`                    |
 | `setAutoGenerateWhenMissing()` | `auto_generate_when_missing` |
+| `setDriver()`                | `driver`                      |
+| `setStaticEnvMap()`          | `drivers.static`              |
 | `setDefaultLabel()`          | `default.label`               |
 | `setDefaultColor()`          | `default.color`               |
 | `setEnvMap()`                | `env_map`                     |
@@ -129,6 +131,8 @@ php artisan vendor:publish --tag="filament-deploy-indicator-config"
 | `file_path`                  | `storage/app/private/deploy-info.json` | Path to read deployment JSON from               |
 | `write_path`                 | `null` (falls back to `file_path`)   | Path to write generated JSON to                    |
 | `auto_generate_when_missing` | `true`                               | Generate JSON using git if file is missing         |
+| `driver`                     | `'git'`                              | Deploy info source: `'git'`, `'static'`, or `['static', 'git']` (env: `DEPLOY_INDICATOR_DRIVER`) |
+| `drivers.static`             | See config                           | Env var names the `static` driver reads            |
 | `git_root`                   | `base_path()`                        | Root of the git repository (env: `DEPLOY_INDICATOR_GIT_ROOT`) |
 | `env_map`                    | See config                           | Mapping of environment → label + Filament color    |
 | `topbar.show`                | `'commit'`                           | `null`, `'commit'`, `'deployed_at'`, `'tag'`, `'branch'` |
@@ -165,6 +169,43 @@ php artisan deploy-indicator:write \
 ### Option 2: Auto-generate on first request
 
 Set `auto_generate_when_missing = true` in config (default). The JSON will be generated from git automatically on the first request if the file is missing. Useful for local development.
+
+### Option 3: Static driver (Docker / Kubernetes, no `.git`)
+
+Production container images usually ship without a `.git` directory, so the
+default `git` driver has nothing to read. Switch to the `static` driver and bake
+the deploy info into the image as environment variables at build time:
+
+```dockerfile
+ARG GIT_COMMIT
+ARG GIT_BRANCH
+ENV DEPLOY_COMMIT=$GIT_COMMIT
+ENV DEPLOY_BRANCH=$GIT_BRANCH
+```
+
+```php
+FilamentDeployIndicatorPlugin::make()
+    ->setDriver('static');            // or ['static', 'git'] for ordered fallback
+```
+
+Or via env: `DEPLOY_INDICATOR_DRIVER=static`. The `static` driver reads these env
+vars (names configurable via `drivers.static` / `->setStaticEnvMap([...])`):
+
+| Field | Default env var |
+|-------|-----------------|
+| environment | `DEPLOY_ENV` |
+| deployed_at | `DEPLOY_AT` |
+| commit | `DEPLOY_COMMIT` |
+| branch | `DEPLOY_BRANCH` |
+| author | `DEPLOY_AUTHOR` |
+| commit_message | `DEPLOY_COMMIT_MESSAGE` |
+| commit_url | `DEPLOY_COMMIT_URL` |
+| tag | `DEPLOY_TAG` |
+
+Use `['static', 'git']` to prefer env vars in containers but fall back to live
+git on local/CI checkouts. The driver needs at least `DEPLOY_COMMIT` or
+`DEPLOY_TAG` set to treat it as a real deploy. Register a custom source via
+`DeployInfoGeneratorManager::extend('name', fn () => new MyGenerator)`.
 
 ---
 

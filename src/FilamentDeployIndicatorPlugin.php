@@ -32,6 +32,37 @@ class FilamentDeployIndicatorPlugin implements Plugin
         return $this;
     }
 
+    /**
+     * Set the deploy info driver.
+     *
+     * @param  string|array<int, string>  $driver  'git', 'static', or an
+     *                                             ordered fallback like ['static', 'git']
+     */
+    public function setDriver(string | array $driver): static
+    {
+        config()->set('filament-deploy-indicator.driver', $driver);
+
+        return $this;
+    }
+
+    /**
+     * Override the env var names the `static` driver reads.
+     *
+     * @param  array<string, string>  $map  e.g. ['commit' => 'GIT_SHA']
+     */
+    public function setStaticEnvMap(array $map): static
+    {
+        config()->set(
+            'filament-deploy-indicator.drivers.static',
+            array_merge(
+                (array) config('filament-deploy-indicator.drivers.static', []),
+                $map,
+            ),
+        );
+
+        return $this;
+    }
+
     public function setFilePath(string $path): static
     {
         config()->set('filament-deploy-indicator.file_path', $path);

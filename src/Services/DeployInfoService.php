@@ -2,6 +2,7 @@
 
 namespace Arnautdev\FilamentDeployIndicator\Services;
 
+use Arnautdev\FilamentDeployIndicator\Services\Generators\Contracts\DeployInfoGenerator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
@@ -9,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 class DeployInfoService
 {
     public function __construct(
-        protected GitDeployInfoGenerator $generator,
+        protected DeployInfoGenerator $generator,
         protected DeployHistoryService $history,
     ) {}
 

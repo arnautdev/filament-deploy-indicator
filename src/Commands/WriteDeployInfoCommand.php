@@ -3,7 +3,7 @@
 namespace Arnautdev\FilamentDeployIndicator\Commands;
 
 use Arnautdev\FilamentDeployIndicator\Services\DeployHistoryService;
-use Arnautdev\FilamentDeployIndicator\Services\GitDeployInfoGenerator;
+use Arnautdev\FilamentDeployIndicator\Services\Generators\Contracts\DeployInfoGenerator;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 
@@ -22,7 +22,7 @@ class WriteDeployInfoCommand extends Command
     protected $description = 'Write deploy-info.json for Filament Deploy Indicator';
 
     public function __construct(
-        protected GitDeployInfoGenerator $generator,
+        protected DeployInfoGenerator $generator,
         protected DeployHistoryService $history,
     ) {
         parent::__construct();

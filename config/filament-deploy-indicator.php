@@ -74,6 +74,49 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Deploy info driver
+    |--------------------------------------------------------------------------
+    |
+    | Where deploy info is sourced from when auto-generating.
+    |
+    | - 'git'              => read live git data (needs a .git dir on the server)
+    | - 'static'          => read env vars (great for Docker/Kubernetes images
+    |                         that ship without .git — bake the values at build)
+    | - ['static', 'git'] => ordered fallback: use env vars if present,
+    |                         otherwise fall back to git
+    |
+    */
+    'driver' => env('DEPLOY_INDICATOR_DRIVER', 'git'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Driver options
+    |--------------------------------------------------------------------------
+    |
+    | The `static` driver reads deploy info from environment variables. The
+    | values below are the env var *names* it looks up (the values are read at
+    | runtime, so this keeps working even when the Laravel config is cached).
+    |
+    | Example Dockerfile:
+    |   ARG GIT_COMMIT
+    |   ENV DEPLOY_COMMIT=$GIT_COMMIT
+    |
+    */
+    'drivers' => [
+        'static' => [
+            'environment' => 'DEPLOY_ENV',
+            'deployed_at' => 'DEPLOY_AT',
+            'commit' => 'DEPLOY_COMMIT',
+            'branch' => 'DEPLOY_BRANCH',
+            'author' => 'DEPLOY_AUTHOR',
+            'commit_message' => 'DEPLOY_COMMIT_MESSAGE',
+            'commit_url' => 'DEPLOY_COMMIT_URL',
+            'tag' => 'DEPLOY_TAG',
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | ENV label and color mapping
     |--------------------------------------------------------------------------
     |

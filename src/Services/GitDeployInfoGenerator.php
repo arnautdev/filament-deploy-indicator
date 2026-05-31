@@ -2,9 +2,10 @@
 
 namespace Arnautdev\FilamentDeployIndicator\Services;
 
+use Arnautdev\FilamentDeployIndicator\Services\Generators\Contracts\DeployInfoGenerator;
 use Illuminate\Support\Facades\Process;
 
-class GitDeployInfoGenerator
+class GitDeployInfoGenerator implements DeployInfoGenerator
 {
     public function canRun(): bool
     {

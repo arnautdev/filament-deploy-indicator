@@ -3,7 +3,7 @@
 namespace Arnautdev\FilamentDeployIndicator\Commands;
 
 use Arnautdev\FilamentDeployIndicator\Services\DeployInfoService;
-use Arnautdev\FilamentDeployIndicator\Services\GitDeployInfoGenerator;
+use Arnautdev\FilamentDeployIndicator\Services\Generators\Contracts\DeployInfoGenerator;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 
@@ -14,7 +14,7 @@ class CheckDeployIndicatorCommand extends Command
     protected $description = 'Check Filament Deploy Indicator configuration and environment';
 
     public function __construct(
-        protected GitDeployInfoGenerator $generator,
+        protected DeployInfoGenerator $generator,
         protected DeployInfoService $service,
     ) {
         parent::__construct();
@@ -32,22 +32,24 @@ class CheckDeployIndicatorCommand extends Command
             'Config not published — run: php artisan vendor:publish --tag="filament-deploy-indicator-config"'
         );
 
+        $driver = config('filament-deploy-indicator.driver', 'git');
+        $driverLabel = is_array($driver) ? implode(' → ', $driver) : (string) $driver;
         $gitRoot = config('filament-deploy-indicator.git_root', base_path());
-        $gitAvailable = $this->generator->canRun();
+        $sourceAvailable = $this->generator->canRun();
         $this->checkLine(
-            $gitAvailable,
-            "Git repository detected at: {$gitRoot}",
-            "No .git found at: {$gitRoot} — set DEPLOY_INDICATOR_GIT_ROOT or update git_root in config"
+            $sourceAvailable,
+            "Deploy info source ready (driver: {$driverLabel})",
+            "Deploy info source [{$driverLabel}] cannot run — for 'git' check .git at {$gitRoot} (DEPLOY_INDICATOR_GIT_ROOT); for 'static' set the DEPLOY_* env vars"
         );
 
-        if ($gitAvailable) {
+        if ($sourceAvailable) {
             $generated = $this->generator->generate();
-            $gitReadable = $generated !== [];
+            $infoReadable = $generated !== [];
             $shortCommit = substr($generated['commit'] ?? '', 0, 7);
             $this->checkLine(
-                $gitReadable,
-                "Git info readable (commit: {$shortCommit}, branch: " . ($generated['branch'] ?? 'detached') . ')',
-                'Git info could not be read — ensure git binary is available and the repository has commits'
+                $infoReadable,
+                "Deploy info readable (commit: {$shortCommit}, branch: " . ($generated['branch'] ?? 'detached') . ')',
+                'Deploy info could not be read — for git ensure the binary is available with commits; for static ensure DEPLOY_COMMIT/DEPLOY_TAG are set'
             );
         }
 
