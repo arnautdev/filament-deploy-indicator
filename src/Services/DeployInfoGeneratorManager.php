@@ -51,7 +51,7 @@ class DeployInfoGeneratorManager
 
         if (is_array($driver)) {
             return new CompositeDeployInfoGenerator(
-                array_map(fn (string $name): DeployInfoGenerator => $this->make($name), array_values($driver)),
+                array_map($this->make(...), array_values($driver)),
             );
         }
 

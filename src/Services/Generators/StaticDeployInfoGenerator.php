@@ -23,7 +23,11 @@ class StaticDeployInfoGenerator implements DeployInfoGenerator
     public function canRun(): bool
     {
         // We need at least a commit or a tag to consider this a real deploy.
-        return $this->read('commit') !== null || $this->read('tag') !== null;
+        if ($this->read('commit') !== null) {
+            return true;
+        }
+
+        return $this->read('tag') !== null;
     }
 
     public function generate(): array
