@@ -2,6 +2,13 @@
 
 All notable changes to `filament-deploy-indicator` will be documented in this file.
 
+## [1.2.1](https://github.com/arnautdev/filament-deploy-indicator/compare/v1.2.0...v1.2.1) (2026-06-19)
+
+
+### Miscellaneous Chores
+
+* release 1.2.1 ([91af07d](https://github.com/arnautdev/filament-deploy-indicator/commit/91af07dbb943a369d22d0ed152a3a48855d69c06))
+
 ## [1.2.0](https://github.com/arnautdev/filament-deploy-indicator/compare/v1.1.0...v1.2.0) (2026-05-31)
 
 
