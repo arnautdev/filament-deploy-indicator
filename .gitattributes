@@ -26,3 +26,11 @@
 /tailwind.config.js     export-ignore
 /testbench.yaml         export-ignore
 /UPGRADING.md           export-ignore
+/workbench              export-ignore
+/build                  export-ignore
+/bin                    export-ignore
+/rector.php             export-ignore
+/release-please-config.json     export-ignore
+/.release-please-manifest.json  export-ignore
+/.phpunit.cache         export-ignore
+/.ai                    export-ignore
