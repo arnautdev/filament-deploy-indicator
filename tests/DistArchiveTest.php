@@ -17,7 +17,7 @@
  */
 function exportIgnoredPaths(): array
 {
-    $file = dirname(__DIR__).'/.gitattributes';
+    $file = dirname(__DIR__) . '/.gitattributes';
     $paths = [];
 
     foreach (file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
@@ -73,8 +73,8 @@ it('does not ship the workbench scaffold in the real dist archive', function () 
     // test is valid even before the fix is committed. `-c safe.directory`
     // avoids the "dubious ownership" abort common in CI containers.
     $output = shell_exec(
-        'git -C '.escapeshellarg($root).' -c safe.directory='.escapeshellarg($root)
-        .' archive --worktree-attributes HEAD 2>/dev/null | tar -t 2>/dev/null'
+        'git -C ' . escapeshellarg($root) . ' -c safe.directory=' . escapeshellarg($root)
+        . ' archive --worktree-attributes HEAD 2>/dev/null | tar -t 2>/dev/null'
     );
 
     $entries = array_values(array_filter(array_map('trim', explode("\n", (string) $output))));
