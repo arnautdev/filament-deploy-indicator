@@ -16,7 +16,7 @@ function distArchiveEntries(): array
     $root = dirname(__DIR__);
 
     $output = shell_exec(
-        'cd '.escapeshellarg($root).' && git archive --worktree-attributes HEAD 2>/dev/null | tar -t'
+        'cd ' . escapeshellarg($root) . ' && git archive --worktree-attributes HEAD 2>/dev/null | tar -t'
     );
 
     return array_values(array_filter(array_map('trim', explode("\n", (string) $output))));
@@ -42,7 +42,7 @@ it('does not ship any tracked symlink in the dist archive', function () {
     $symlinks = array_values(array_filter(array_map(
         'trim',
         explode("\n", (string) shell_exec(
-            'cd '.escapeshellarg($root).' && git ls-files -s | awk \'$1=="120000"{print $4}\''
+            'cd ' . escapeshellarg($root) . ' && git ls-files -s | awk \'$1=="120000"{print $4}\''
         )),
     )));
 
