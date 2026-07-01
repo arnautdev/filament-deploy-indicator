@@ -2,6 +2,13 @@
 
 All notable changes to `filament-deploy-indicator` will be documented in this file.
 
+## [1.3.0](https://github.com/arnautdev/filament-deploy-indicator/compare/v1.2.1...v1.3.0) (2026-07-01)
+
+
+### Features
+
+* add Dev Tools navigation group and support for tool-specific configurations ([#18](https://github.com/arnautdev/filament-deploy-indicator/issues/18)) ([646c553](https://github.com/arnautdev/filament-deploy-indicator/commit/646c5534f1142e60bdd1edd7c538ea750138dbe0))
+
 ## [1.2.1](https://github.com/arnautdev/filament-deploy-indicator/compare/v1.2.0...v1.2.1) (2026-06-19)
 
 
