@@ -2,6 +2,13 @@
 
 All notable changes to `filament-deploy-indicator` will be documented in this file.
 
+## [1.3.1](https://github.com/arnautdev/filament-deploy-indicator/compare/v1.3.0...v1.3.1) (2026-07-01)
+
+
+### Bug Fixes
+
+* defer group label resolution using closures in DevTools navigation builder ([8a20eaa](https://github.com/arnautdev/filament-deploy-indicator/commit/8a20eaaf342c0d5f4517ec6a7b3af933aa53d458))
+
 ## [1.3.0](https://github.com/arnautdev/filament-deploy-indicator/compare/v1.2.1...v1.3.0) (2026-07-01)
 
 
