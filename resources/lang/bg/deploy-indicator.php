@@ -13,4 +13,7 @@ return [
     'copy' => 'Копирай commit хеш',
     'copied' => 'Копирано!',
     'recent_deploys' => 'Последни деплойменти',
+    'dev_tools' => [
+        'group' => 'Dev Tools',
+    ],
 ];

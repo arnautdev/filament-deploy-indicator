@@ -13,4 +13,7 @@ return [
     'copy' => 'Copy commit hash',
     'copied' => 'Copied!',
     'recent_deploys' => 'Recent deploys',
+    'dev_tools' => [
+        'group' => 'Dev Tools',
+    ],
 ];

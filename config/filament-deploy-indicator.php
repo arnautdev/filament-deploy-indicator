@@ -138,4 +138,83 @@ return [
         'date_format' => 'd.m H:i',
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Dev Tools navigation group
+    |--------------------------------------------------------------------------
+    |
+    | Surface external / internal developer tooling (Horizon, Telescope, ...)
+    | as a navigation group in the Filament sidebar. Each tool is a link,
+    | gated by its own permission, hidden when its URL is not configured, and
+    | optionally restricted to a set of environments.
+    |
+    | - 'enabled'     => master switch for the whole group.
+    | - 'permission'  => group-level gate. null = everyone; a string is treated
+    |                    as a Gate ability (auth user must ->can() it). For a
+    |                    Closure gate use ->devToolsPermission(fn () => ...) on
+    |                    the plugin (Closures cannot live in a cached config).
+    |
+    | Per tool:
+    | - 'permission'     => null | ability string (Closure via ->toolPermission()).
+    | - 'url'            => link target; when empty the tool is hidden.
+    | - 'environments'  => null surfaces it everywhere (production included);
+    |                      an array restricts it (e.g. ['local', 'development']).
+    | - 'open_in_new_tab'=> open the link in a new browser tab.
+    |
+    | Add your own tools by extending 'tools' (or ->addTool() on the plugin).
+    |
+    */
+    'dev_tools' => [
+        'enabled' => true,
+
+        'group_label' => 'filament-deploy-indicator::deploy-indicator.dev_tools.group',
+
+        'collapsed' => true,
+
+        'permission' => null,
+
+        'tools' => [
+            'horizon' => [
+                'label' => 'Horizon',
+                'icon' => 'heroicon-o-server-stack',
+                'permission' => null,
+                'url' => env('DEPLOY_INDICATOR_HORIZON_URL', '/horizon'),
+                'environments' => null,
+                'open_in_new_tab' => true,
+            ],
+            'telescope' => [
+                'label' => 'Telescope',
+                'icon' => 'heroicon-o-bug-ant',
+                'permission' => null,
+                'url' => env('DEPLOY_INDICATOR_TELESCOPE_URL', '/telescope'),
+                'environments' => ['local', 'development'],
+                'open_in_new_tab' => true,
+            ],
+            'mailpit' => [
+                'label' => 'Mailpit',
+                'icon' => 'heroicon-o-envelope',
+                'permission' => null,
+                'url' => env('DEPLOY_INDICATOR_MAILPIT_URL'),
+                'environments' => ['local', 'development'],
+                'open_in_new_tab' => true,
+            ],
+            'openobserve' => [
+                'label' => 'OpenObserve',
+                'icon' => 'heroicon-o-chart-bar',
+                'permission' => null,
+                'url' => env('DEPLOY_INDICATOR_OPENOBSERVE_URL'),
+                'environments' => null,
+                'open_in_new_tab' => true,
+            ],
+            'swagger' => [
+                'label' => 'Swagger',
+                'icon' => 'heroicon-o-code-bracket-square',
+                'permission' => null,
+                'url' => env('DEPLOY_INDICATOR_SWAGGER_URL', '/swagger'),
+                'environments' => null,
+                'open_in_new_tab' => true,
+            ],
+        ],
+    ],
+
 ];

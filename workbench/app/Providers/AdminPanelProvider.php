@@ -33,7 +33,15 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Amber,
             ])
             ->plugins([
-                FilamentDeployIndicatorPlugin::make(),
+                FilamentDeployIndicatorPlugin::make()
+                    ->devTools()
+                    ->addTool('docs', [
+                        'label' => 'Docs',
+                        'icon' => 'heroicon-o-book-open',
+                        'url' => 'https://filamentphp.com/docs',
+                        'environments' => null,
+                        'open_in_new_tab' => true,
+                    ]),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
