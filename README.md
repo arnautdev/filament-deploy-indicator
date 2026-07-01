@@ -16,6 +16,7 @@ Show the current application environment (ENV) and optional latest deployment in
 - Reads deployment metadata from a JSON file (default: `storage/app/private/deploy-info.json`).
 - Can auto-generate the JSON from git on first request, or generate it during deployment via Artisan command.
 - Records every deploy to an append-only history log and shows the last few in the dropdown.
+- Optional **Dev Tools** navigation group: surface links to Horizon, Telescope, Mailpit, and your own tools in the sidebar, each gated by permission and environment.
 
 ## Requirements
 
@@ -89,6 +90,21 @@ FilamentDeployIndicatorPlugin::make()
     ->setHistoryMaxEntries(100)
     ->setHistoryShowInDropdown(5)
 
+    // Dev Tools navigation group
+    ->devTools()                                   // enable the group
+    ->devToolsGroupLabel('Dev Tools')              // group label (string or Closure)
+    ->devToolsGroupCollapsed(true)                 // start collapsed
+    ->devToolsPermission('access-dev-tools')       // group gate (string or Closure)
+    ->addTool('grafana', [                         // add/override one tool
+        'label' => 'Grafana',
+        'icon' => 'heroicon-o-chart-bar',
+        'url' => env('GRAFANA_URL'),
+        'permission' => null,                      // null | ability string
+        'environments' => null,                    // null = everywhere; ['local'] to restrict
+        'open_in_new_tab' => true,
+    ])
+    ->toolPermission('grafana', fn (): bool => auth()->user()?->isAdmin() === true)
+
     // Conditional visibility
     ->visible(fn (): bool => auth()->user()?->is_admin === true),
 ```
@@ -112,6 +128,13 @@ FilamentDeployIndicatorPlugin::make()
 | `setHistoryPath()`           | `history.path`                |
 | `setHistoryMaxEntries()`     | `history.max_entries`         |
 | `setHistoryShowInDropdown()` | `history.show_in_dropdown`    |
+| `devTools()`                 | `dev_tools.enabled`           |
+| `devToolsGroupLabel()`       | `dev_tools.group_label`       |
+| `devToolsGroupCollapsed()`   | `dev_tools.collapsed`         |
+| `devToolsPermission()`       | `dev_tools.permission` (string) / runtime (Closure) |
+| `setTools()`                 | `dev_tools.tools`             |
+| `addTool()`                  | `dev_tools.tools.{key}`       |
+| `toolPermission()`           | `dev_tools.tools.{key}.permission` (string) / runtime (Closure) |
 | `visible()`                  | (runtime only)                |
 
 ### Published config file
@@ -138,6 +161,67 @@ php artisan vendor:publish --tag="filament-deploy-indicator-config"
 | `history.path`               | `storage/app/private/deploy-history.jsonl` | Path of the JSONL history file               |
 | `history.max_entries`        | `100`                                | How many entries to keep (older ones are trimmed)  |
 | `history.show_in_dropdown`   | `5`                                  | How many recent deploys to show in the dropdown    |
+| `dev_tools.enabled`          | `true`                               | Master switch for the Dev Tools navigation group   |
+| `dev_tools.group_label`      | translation key                      | Sidebar group label (string or translation key)    |
+| `dev_tools.collapsed`        | `true`                               | Whether the group starts collapsed                 |
+| `dev_tools.permission`       | `null`                               | Group-level Gate ability (`null` = everyone)       |
+| `dev_tools.tools`            | See config                           | Map of tool key → link definition                  |
+
+---
+
+## Dev Tools navigation group
+
+Surface links to developer tooling (Horizon, Telescope, Mailpit, OpenObserve, Swagger, or anything you add) as a collapsible **Dev Tools** group in the Filament sidebar. It is disabled unless you turn it on — either keep `dev_tools.enabled` in the published config or call `->devTools()` on the plugin.
+
+Each tool is:
+
+- **Hidden when its URL is empty** — set the URL via env so each environment points at its own host.
+- **Gated by permission** — a group-level gate plus an optional per-tool gate. A permission can be a Gate ability string (the user must `->can()` it) or a Closure for custom logic.
+- **Restricted by environment** — `environments: null` shows it everywhere (production included); an array like `['local', 'development']` keeps it out of production.
+
+### Configure via env
+
+The shipped preset reads these env vars (empty URL = hidden):
+
+```dotenv
+DEPLOY_INDICATOR_HORIZON_URL=/horizon
+DEPLOY_INDICATOR_TELESCOPE_URL=/telescope
+DEPLOY_INDICATOR_MAILPIT_URL=http://localhost:8025
+DEPLOY_INDICATOR_OPENOBSERVE_URL=
+DEPLOY_INDICATOR_SWAGGER_URL=/swagger
+```
+
+### Permissions
+
+Restrict the whole group, or a single tool:
+
+```php
+FilamentDeployIndicatorPlugin::make()
+    ->devTools()
+    ->devToolsPermission('access-dev-tools')      // everyone in the group must pass this
+    ->toolPermission('horizon', 'access-horizon'); // and this to see Horizon specifically
+```
+
+A tool is visible only when **both** the group gate and its own gate pass. Use `null` (the default) to leave a gate open.
+
+> **Config caching:** string abilities live in the published config and survive `php artisan config:cache`. Closures cannot be cached — pass them through `->devToolsPermission(fn () => ...)` / `->toolPermission('key', fn () => ...)` instead, which keeps them on the plugin instance.
+
+### Add your own tools
+
+```php
+FilamentDeployIndicatorPlugin::make()
+    ->devTools()
+    ->addTool('grafana', [
+        'label' => 'Grafana',
+        'icon' => 'heroicon-o-chart-bar',
+        'url' => env('GRAFANA_URL'),
+        'permission' => 'access-grafana', // optional
+        'environments' => null,           // optional
+        'open_in_new_tab' => true,
+    ]);
+```
+
+Use `->setTools([...])` to replace the whole preset, or edit the `dev_tools.tools` array in the published config.
 
 ---
 
