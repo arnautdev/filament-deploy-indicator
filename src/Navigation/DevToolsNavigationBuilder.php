@@ -27,7 +27,10 @@ class DevToolsNavigationBuilder
             return [];
         }
 
-        $group = $this->groupLabel();
+        // Resolved lazily: the plugin registers navigation during Panel
+        // registration, before package translations are loaded. A Closure
+        // defers __() to render time, when the group label is available.
+        $group = fn (): string => $this->groupLabel();
 
         $items = [];
         $sort = 0;
@@ -52,7 +55,7 @@ class DevToolsNavigationBuilder
 
     public function group(): NavigationGroup
     {
-        return NavigationGroup::make($this->groupLabel())
+        return NavigationGroup::make(fn (): string => $this->groupLabel())
             ->collapsed((bool) config('filament-deploy-indicator.dev_tools.collapsed', true));
     }
 
